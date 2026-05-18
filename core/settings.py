@@ -59,6 +59,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,3 +126,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
+
+# Настройка статических файлов
+STATIC_URL = '/static/' # Это URL, по которому файлы будут доступны на сайте
+
+# Это список папок, где Django будет искать статические файлы
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- Настройка вьюпорта для адаптивности на мобильных устройствах -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EventMate{% endblock %}</title>
+    <!-- Подключение CSS Bootstrap (через CDN - самый быстрый способ) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Здесь будет место для дополнительных CSS-файлов, которые понадобятся на отдельных страницах -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Навигационная панель (Navbar) из Bootstrap -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">EventMate</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Главная</a>
+                    </li>
+                    <!-- Вы можете сами добавить сюда ссылки на другие страницы -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной блок контента. Каждая дочерняя страница будет вставлять свой код сюда -->
+    <main class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Подключение JS Bootstrap (необходим для работы интерактивных компонентов, например, бургер-меню) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Здесь будет место для дополнительных JS-скриптов, которые понадобятся на отдельных страницах -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
