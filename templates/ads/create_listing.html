@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Новое объявление{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card event-card p-4">
+        <h2>Создать объявление о поиске напарника</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary-oval btn-oval">Опубликовать</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

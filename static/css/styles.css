@@ -1,0 +1,95 @@
+/* Основные переменные */
+:root {
+    --primary-light: #f9f7f3;   /* очень светлый бежевый фон */
+    --primary-bright: #ff6b6b;  /* яркий коралловый для акцентов */
+    --secondary-bright: #4ecdc4; /* бирюзовый для второстепенных элементов */
+    --dark-text: #2d3436;
+    --light-text: #ffffff;
+    --shadow-sm: 0 10px 20px rgba(0,0,0,0.05);
+    --border-radius-oval: 40px;  /* для овальных элементов */
+}
+
+body {
+    background-color: var(--primary-light);
+    color: var(--dark-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Овальные кнопки и карточки */
+.btn-oval {
+    border-radius: var(--border-radius-oval);
+    padding: 10px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-primary-oval {
+    background-color: var(--primary-bright);
+    border: none;
+    color: white;
+}
+.btn-primary-oval:hover {
+    background-color: #ff5252;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+.btn-secondary-oval {
+    background-color: var(--secondary-bright);
+    border: none;
+    color: white;
+}
+.btn-secondary-oval:hover {
+    background-color: #3dbdb4;
+    transform: translateY(-2px);
+}
+
+/* Карточки событий */
+.event-card {
+    border-radius: 20px;
+    border: none;
+    transition: all 0.3s;
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+}
+.card-img-top {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+/* Навигационная панель */
+.navbar-custom {
+    background-color: white;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    padding: 15px 0;
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--primary-bright);
+}
+.nav-link {
+    font-weight: 500;
+    margin: 0 10px;
+    color: var(--dark-text);
+    transition: 0.3s;
+}
+.nav-link:hover {
+    color: var(--primary-bright);
+}
+
+/* Футер */
+.footer {
+    background-color: white;
+    margin-top: 4rem;
+    padding: 2rem 0;
+    text-align: center;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Адаптивные отступы */
+.container {
+    max-width: 1200px;
+}

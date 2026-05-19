@@ -1,15 +1,35 @@
 {% extends "base.html" %}
-
-{% block title %}Главная | EventMate{% endblock %}
-
+{% block title %}Главная{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-12 text-center">
-        <h1 class="display-4 mt-5">Добро пожаловать на EventMate!</h1>
-        <p class="lead">Твой помощник в поиске напарника для мероприятий.</p>
-        <hr class="my-4">
-        <p>Здесь будет твоя будущая лента событий</p>
-        <a class="btn btn-primary btn-lg" href="#" role="button">Искать напарника</a>
+<div class="container mt-5">
+    <div class="text-center py-5">
+        <h1 class="display-4 fw-bold" style="color: #ff6b6b;">Найди попутчика на событие</h1>
+        <p class="lead mt-3">Присоединяйся к мероприятиям с кем-то, кто разделяет твои интересы.</p>
+        <a href="{% url 'events' %}" class="btn btn-primary-oval btn-oval mt-4">Смотреть события</a>
+        <a href="{% url 'listings' %}" class="btn btn-secondary-oval btn-oval mt-4 ms-2">Ищу напарника</a>
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="event-card p-4 text-center">
+                <i class="fas fa-calendar-alt fa-3x" style="color: #ff6b6b;"></i>
+                <h3 class="mt-3">Мероприятия</h3>
+                <p>Выбирай из тысяч событий: концерты, кино, спорт.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="event-card p-4 text-center">
+                <i class="fas fa-users fa-3x" style="color: #4ecdc4;"></i>
+                <h3 class="mt-3">Напарники</h3>
+                <p>Находи единомышленников для совместного похода.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="event-card p-4 text-center">
+                <i class="fas fa-comment-dots fa-3x" style="color: #ff6b6b;"></i>
+                <h3 class="mt-3">Общайся</h3>
+                <p>Договаривайся, обсуждай детали, делись впечатлениями.</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

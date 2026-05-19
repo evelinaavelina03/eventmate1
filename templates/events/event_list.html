@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}События{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Ближайшие события</h1>
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-4 mb-4">
+            <div class="event-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">{{ event.event_date|date:"d.m.Y H:i" }}<br>{{ event.city.name }}</p>
+                    <a href="{% url 'event_detail' event.event_id %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Пока нет событий. Стань первым, кто добавит!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
