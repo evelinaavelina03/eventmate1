@@ -2,21 +2,38 @@
 {% block title %}События{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">Ближайшие события</h1>
-    <div class="row">
-        {% for event in events %}
-        <div class="col-md-4 mb-4">
-            <div class="event-card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ event.title }}</h5>
-                    <p class="card-text">{{ event.event_date|date:"d.m.Y H:i" }}<br>{{ event.city.name }}</p>
-                    <a href="{% url 'event_detail' event.event_id %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
+    <h1>События</h1>
+    {% if events %}
+        <div class="row">
+            {% for event in events %}
+            <div class="col-md-4 mb-4">
+                <div class="card event-card h-100">
+                    {% if event.image %}
+                        <img src="{{ event.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-image fa-3x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.title }}</h5>
+                        <p class="card-text">
+                            {{ event.event_date|date:"d.m.Y H:i" }}<br>
+                            {{ event.city.name }}<br>
+                            Категория: {{ event.interest.name }}
+                        </p>
+                        {% if event.pk %}
+                            <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
+                        {% else %}
+                            <span class="btn btn-secondary btn-oval disabled">Ошибка ID</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <p>Пока нет событий. Стань первым, кто добавит!</p>
-        {% endfor %}
-    </div>
+    {% else %}
+        <p>Нет событий.</p>
+    {% endif %}
 </div>
 {% endblock %}

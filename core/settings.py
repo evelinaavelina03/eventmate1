@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'interests',
     'events',
     'ads',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -106,5 +107,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
 AUTH_USER_MODEL = 'users.User'
+
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+# Настройка для загружаемых пользователями файлов (картинок)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Редактировать профиль{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card event-card p-4">
+        <h2>Редактирование профиля</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary-oval btn-oval">Сохранить</button>
+            <a href="{% url 'profile' username=user.username %}" class="btn btn-secondary-oval btn-oval">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

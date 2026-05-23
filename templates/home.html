@@ -1,35 +1,82 @@
 {% extends "base.html" %}
 {% block title %}Главная{% endblock %}
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="text-center py-5">
         <h1 class="display-4 fw-bold" style="color: #ff6b6b;">Найди попутчика на событие</h1>
-        <p class="lead mt-3">Присоединяйся к мероприятиям с кем-то, кто разделяет твои интересы.</p>
-        <a href="{% url 'events' %}" class="btn btn-primary-oval btn-oval mt-4">Смотреть события</a>
-        <a href="{% url 'listings' %}" class="btn btn-secondary-oval btn-oval mt-4 ms-2">Ищу напарника</a>
+        <p class="lead mt-3">Персональная подборка событий по вашим интересам</p>
     </div>
-    <div class="row mt-5">
-        <div class="col-md-4">
-            <div class="event-card p-4 text-center">
-                <i class="fas fa-calendar-alt fa-3x" style="color: #ff6b6b;"></i>
-                <h3 class="mt-3">Мероприятия</h3>
-                <p>Выбирай из тысяч событий: концерты, кино, спорт.</p>
+
+    {% if user.is_authenticated %}
+        <h2 class="mb-4">Рекомендованные события</h2>
+        {% if events %}
+            <div class="row">
+                {% for event in events %}
+                <div class="col-md-4 mb-4">
+                    <div class="card event-card h-100">
+                        {% if event.image %}
+                            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text">
+                                {{ event.event_date|date:"d.m.Y H:i" }}<br>
+                                {{ event.city.name }}<br>
+                                Категория: {{ event.interest.name }}
+                            </p>
+                            {% if event.pk %}
+                                <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
+                            {% else %}
+                                <span class="btn btn-secondary btn-oval disabled">Нет ID</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
+        {% else %}
+            <p>Пока нет событий по вашим интересам. <a href="{% url 'set_interests' %}">Изменить интересы</a> или добавьте новые события через админку.</p>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info">
+            <a href="{% url 'login' %}" class="btn btn-link">Войдите</a> или <a href="{% url 'register' %}" class="btn btn-link">зарегистрируйтесь</a>, чтобы видеть персональную подборку.
         </div>
-        <div class="col-md-4">
-            <div class="event-card p-4 text-center">
-                <i class="fas fa-users fa-3x" style="color: #4ecdc4;"></i>
-                <h3 class="mt-3">Напарники</h3>
-                <p>Находи единомышленников для совместного похода.</p>
+        <h2>Ближайшие события</h2>
+        {% if events %}
+            <div class="row">
+                {% for event in events %}
+                <div class="col-md-4 mb-4">
+                    <div class="card event-card h-100">
+                        {% if event.image %}
+                            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text">
+                                {{ event.event_date|date:"d.m.Y H:i" }}<br>
+                                {{ event.city.name }}
+                            </p>
+                            {% if event.pk %}
+                                <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
+                            {% else %}
+                                <span class="btn btn-secondary btn-oval disabled">Нет ID</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="event-card p-4 text-center">
-                <i class="fas fa-comment-dots fa-3x" style="color: #ff6b6b;"></i>
-                <h3 class="mt-3">Общайся</h3>
-                <p>Договаривайся, обсуждай детали, делись впечатлениями.</p>
-            </div>
-        </div>
-    </div>
+        {% else %}
+            <p>Пока нет событий. Зайдите в админку и добавьте несколько мероприятий.</p>
+        {% endif %}
+    {% endif %}
 </div>
 {% endblock %}

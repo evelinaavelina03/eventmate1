@@ -1,4 +1,17 @@
 from django.db import models
+import os
+
+# Функция для формирования пути к файлу должна быть вне класса, чтобы не было ошибок с self
+def event_photo_path(instance, filename):
+    # Получаем расширение файла
+    ext = filename.split('.')[-1]
+    # Формируем новое имя файла (используем pk, если он уже есть, иначе временно None)
+    if instance.pk:
+        new_filename = f"event_{instance.pk}.{ext}"
+        return os.path.join('event_photos', f'event_{instance.pk}', new_filename)
+    else:
+        # Если объект ещё не сохранён, кладём во временную папку
+        return os.path.join('event_photos', 'temp', filename)
 
 class Status(models.Model):
     STATUS_CHOICES = [
@@ -36,7 +49,9 @@ class Event(models.Model):
     
     # Дополнительные поля
     event_date = models.DateTimeField(null=True, blank=True)
-    image_url = models.URLField(max_length=500, blank=True, null=True)
+    
+    # Поле для изображения (новое, вместо image_url)
+    image = models.ImageField(upload_to=event_photo_path, blank=True, null=True, verbose_name="Изображение события")
     
     # Статус модерации
     status = models.ForeignKey(Status, on_delete=models.CASCADE)

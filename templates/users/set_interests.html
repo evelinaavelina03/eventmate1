@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Выберите ваши интересы</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            {% for interest in interests %}
+            <div class="col-md-3 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="interests" value="{{ interest.interest_id }}" id="interest_{{ interest.interest_id }}">
+                    <label class="form-check-label" for="interest_{{ interest.interest_id }}">
+                        {{ interest.name }}
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary-oval btn-oval mt-3">Сохранить</button>
+    </form>
+</div>
+{% endblock %}
