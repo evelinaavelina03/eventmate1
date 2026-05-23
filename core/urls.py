@@ -17,23 +17,15 @@ urlpatterns = [
     path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
     path('register/', register, name='register'),
     path('set-interests/', set_interests, name='set_interests'),
-    
-    # Страницы событий
     path('events/', event_list, name='events'),
     path('events/<int:event_id>/', event_detail, name='event_detail'),
-    path('events/create/', create_event, name='create_event'),   # один раз
-    
-    # Страницы объявлений
+    path('events/create/', create_event, name='create_event'),
     path('listings/', listing_list, name='listings'),
     path('listings/create/', create_listing, name='create_listing'),
-    
-    # Аутентификация
     path('login/', LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
-    #профиль
+    path('profile/edit/', edit_profile, name='edit_profile'),        # ← важный порядок
     path('profile/<str:username>/', profile, name='profile'),
-    path('profile/', profile, name='my_profile'),
-    path('profile/edit/', edit_profile, name='edit_profile'),
 ]
 
 # Для разработки: обслуживание загруженных пользователями файлов (медиа)

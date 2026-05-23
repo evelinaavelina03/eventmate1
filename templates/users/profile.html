@@ -12,7 +12,7 @@
                 <p><strong>Дата рождения:</strong> {{ profile_user.birth_date|date:"d.m.Y"|default:"не указана" }}</p>
                 <p><strong>Рейтинг:</strong> {{ profile_user.rating.mark|default:"0" }} / 5</p>
                 {% if request.user == profile_user %}
-                    <a href="#" class="btn btn-secondary-oval btn-oval">Редактировать</a>
+                    <a href="{% url 'edit_profile' %}" class="btn btn-secondary-oval btn-oval mt-3">Редактировать профиль</a>
                 {% endif %}
             </div>
         </div>
