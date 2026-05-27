@@ -25,6 +25,17 @@
         </p>
         <p>{{ event.description|linebreaks }}</p>
         
+        <!-- Кнопка чата (доступна всем авторизованным) -->
+        {% if user.is_authenticated %}
+        <a href="/events/{{ event.id }}/chat/" class="btn btn-info w-100 mt-3">
+            <i class="fas fa-comments"></i> 💬 Чат события
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-info w-100 mt-3">
+            <i class="fas fa-sign-in-alt"></i> Войдите, чтобы участвовать в чате
+        </a>
+        {% endif %}
+        
         <!-- Кнопка "Ищу напарника на это событие" -->
         <a href="{% url 'create_listing' %}?event={{ event.pk }}" class="btn btn-primary-oval btn-oval mt-3">Ищу напарника на это событие</a>
     </div>

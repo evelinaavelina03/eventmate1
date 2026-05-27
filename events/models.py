@@ -70,3 +70,15 @@ class Event(models.Model):
     def get_participants(self):
         """Возвращает список участников события"""
         return [request.user for request in self.requests.all()]
+    
+class EventChatMessage(models.Model):
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='chat_messages')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"{self.user.username}: {self.message[:30]}"

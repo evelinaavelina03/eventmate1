@@ -6,7 +6,7 @@ from .forms import UserRegistrationForm, UserEditForm
 from interests.models import Interest
 from .models import User, UserInterest
 from events.models import Event
-from ads.models import Advertisement, Response   # добавили импорты
+from ads.models import Advertisement, Response
 
 @login_required
 def edit_profile(request):

@@ -1,11 +1,56 @@
 {% extends "base.html" %}
-{% block title %}О проекте{% endblock %}
+{% load static %}
+
+{% block title %}О проекте | EventMate{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <div class="text-center py-5">
-        <h1>О EventMate</h1>
-        <p class="lead">Мы помогаем людям находить компанию для совместного посещения мероприятий.</p>
-        <p>Проект создан для того, чтобы никто не чувствовал себя одиноким на концертах, в кино или на фестивалях.</p>
+    <!-- Hero секция -->
+    <div class="text-center py-5" style="background: linear-gradient(135deg, #ff6b6b20 0%, #ff6b6b05 100%); border-radius: 30px;">
+        <i class="fas fa-heart" style="font-size: 4rem; color: #ff6b6b;"></i>
+        <h1 class="mt-3" style="color: #ff6b6b;">О проекте EventMate</h1>
+        <p class="lead mt-3">Мы помогаем людям находить компанию для совместного посещения мероприятий.</p>
+    </div>
+
+    <!-- Миссия -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h2><i class="fas fa-bullseye" style="color: #ff6b6b;"></i> Наша миссия</h2>
+            <p class="mt-3">Сделать так, чтобы никто не чувствовал себя одиноким на концертах, в кино, на фестивалях и любых других событиях. Мы верим, что совместные впечатления — это лучшие впечатления.</p>
+        </div>
+        <div class="col-md-6">
+            <h2><i class="fas fa-users" style="color: #4ecdc4;"></i> Для кого</h2>
+            <p class="mt-3">Для всех, кто хочет найти единомышленников, познакомиться с новыми людьми или просто разделить радость от посещения любимого мероприятия.</p>
+        </div>
+    </div>
+
+    <!-- Ценности -->
+    <div class="row mt-5">
+        <div class="col-md-4 text-center">
+            <i class="fas fa-hand-peace fa-3x" style="color: #ff6b6b;"></i>
+            <h4 class="mt-2">Доброжелательность</h4>
+            <p>Мы создаём безопасное и дружелюбное пространство</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <i class="fas fa-calendar-alt fa-3x" style="color: #4ecdc4;"></i>
+            <h4 class="mt-2">Удобство</h4>
+            <p>Простой поиск и фильтрация событий</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <i class="fas fa-comments fa-3x" style="color: #ff6b6b;"></i>
+            <h4 class="mt-2">Общение</h4>
+            <p>Чат с участниками перед мероприятием</p>
+        </div>
+    </div>
+
+    <!-- Команда (без иконки перед "Сделано с ❤️") -->
+    <div class="mt-5 p-4" style="background: #f8f9fa; border-radius: 30px;">
+        <h2 class="text-center mb-4">Сделано с ❤️</h2>
+        <p class="text-center">EventMate — проект, созданный для того, чтобы объединять людей. Присоединяйся к нам и находи новых друзей!</p>
+        <div class="text-center mt-3">
+            <a href="/events/" class="btn btn-primary-oval btn-oval">🎉 Найти событие</a>
+            <a href="/events/create/" class="btn btn-outline-secondary rounded-pill px-4 ms-2">✨ Создать событие</a>
+        </div>
     </div>
 </div>
 {% endblock %}

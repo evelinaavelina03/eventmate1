@@ -43,7 +43,7 @@ class Response(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('advertisement', 'user')  # один пользователь может откликнуться только один раз
+        unique_together = ('advertisement', 'user')
 
     def __str__(self):
         return f"{self.user.username} -> {self.advertisement.title}"

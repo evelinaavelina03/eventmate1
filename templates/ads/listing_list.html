@@ -11,10 +11,10 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ listing.title }}</h5>
                         <p class="card-text">{{ listing.description|truncatewords:30 }}</p>
-                        <p><strong>Событие:</strong> <a href="{% url 'event_detail' listing.event.pk %}">{{ listing.event.title }}</a></p>
+                        <p><strong>Событие:</strong> <a href="/events/{{ listing.event.pk }}/">{{ listing.event.title }}</a></p>
                         <p><strong>Автор:</strong> {{ listing.author.username }}</p>
                         <p><strong>Нужно напарников:</strong> {{ listing.companions_needed }}</p>
-                        <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
+                        <a href="/listings/{{ listing.pk }}/" class="btn btn-primary-oval btn-oval">Подробнее</a>
                     </div>
                 </div>
             </div>

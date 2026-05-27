@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Чат: {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card event-card p-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>💬 Чат: {{ event.title }}</h2>
+            <a href="/events/{{ event.id }}/" class="btn btn-outline-secondary">← Назад</a>
+        </div>
+        
+        <hr>
+        
+        <!-- Сообщения с аватарками -->
+        <div class="chat-messages mb-4" style="max-height: 500px; overflow-y: auto; background: #f8f9fa; border-radius: 15px; padding: 15px;" id="chat-messages">
+            {% for msg in messages %}
+            <div class="message mb-3 d-flex {% if msg.user == request.user %}flex-row-reverse{% endif %}" data-message-id="{{ msg.id }}">
+                <!-- Аватар -->
+                <div class="flex-shrink-0">
+                    {% if msg.user.avatar %}
+                    <img src="{{ msg.user.avatar.url }}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Сообщение -->
+                <div class="{% if msg.user == request.user %}me-2{% else %}ms-2{% endif %}" style="max-width: 70%;">
+                    <div class="p-3 rounded {% if msg.user == request.user %}bg-primary text-white{% else %}bg-white border{% endif %}">
+                        <small class="{% if msg.user == request.user %}text-white-50{% else %}text-muted{% endif %} d-block">
+                            <strong>{{ msg.user.username }}</strong> • {{ msg.created_at|date:"d.m.Y H:i" }}
+                        </small>
+                        <p class="mb-0">{{ msg.message|linebreaksbr }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center" id="no-messages">Пока нет сообщений. Напишите первым!</p>
+            {% endfor %}
+        </div>
+        
+        <!-- Форма отправки со смайликами -->
+        <form method="post" id="chat-form">
+            {% csrf_token %}
+            <div class="d-flex flex-column">
+                <div class="mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="emoji-toggle-btn">😊 Смайлики</button>
+                </div>
+                
+                <div id="emoji-panel" style="display: none;" class="mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="😀">😀</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="😂">😂</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="😍">😍</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="🥰">🥰</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="😎">😎</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="👍">👍</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="🎉">🎉</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="❤️">❤️</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="🔥">🔥</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="✅">✅</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="😢">😢</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="😱">😱</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="🤔">🤔</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="🥳">🥳</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-btn" data-emoji="🤗">🤗</button>
+                </div>
+                
+                <div class="d-flex">
+                    {{ form.message }}
+                    <button type="submit" class="btn btn-primary-oval ms-2">✉️</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let lastMessageId = 0;
+    let isLoading = false;
+    
+    // Получаем ID последнего сообщения из уже загруженных
+    const existingMessages = document.querySelectorAll('#chat-messages .message');
+    if (existingMessages.length > 0) {
+        const lastMsg = existingMessages[existingMessages.length - 1];
+        lastMessageId = parseInt(lastMsg.getAttribute('data-message-id')) || 0;
+    }
+    
+    // Функция загрузки новых сообщений
+    function loadMessages() {
+        if (isLoading) return;
+        isLoading = true;
+        
+        fetch(`/events/{{ event.id }}/api/messages/?last_id=${lastMessageId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        addMessageToChat(msg);
+                        lastMessageId = Math.max(lastMessageId, msg.id);
+                    });
+                    const noMessagesDiv = document.getElementById('no-messages');
+                    if (noMessagesDiv) {
+                        noMessagesDiv.style.display = 'none';
+                    }
+                }
+                isLoading = false;
+            })
+            .catch(() => {
+                isLoading = false;
+            });
+    }
+    
+    // Функция добавления сообщения в чат
+    function addMessageToChat(msg) {
+        const chatContainer = document.getElementById('chat-messages');
+        const isMine = msg.is_mine;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message mb-3 d-flex ${isMine ? 'flex-row-reverse' : ''}`;
+        messageDiv.setAttribute('data-message-id', msg.id);
+        
+        // Аватар
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'flex-shrink-0';
+        if (msg.avatar) {
+            avatarDiv.innerHTML = `<img src="${msg.avatar}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">`;
+        } else {
+            avatarDiv.innerHTML = `<div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>`;
+        }
+        
+        // Сообщение
+        const messageContentDiv = document.createElement('div');
+        messageContentDiv.className = `${isMine ? 'me-2' : 'ms-2'}`;
+        messageContentDiv.style.maxWidth = '70%';
+        messageContentDiv.innerHTML = `
+            <div class="p-3 rounded ${isMine ? 'bg-primary text-white' : 'bg-white border'}">
+                <small class="${isMine ? 'text-white-50' : 'text-muted'} d-block">
+                    <strong>${escapeHtml(msg.username)}</strong> • ${msg.created_at}
+                </small>
+                <p class="mb-0">${escapeHtml(msg.message).replace(/\n/g, '<br>')}</p>
+            </div>
+        `;
+        
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(messageContentDiv);
+        chatContainer.appendChild(messageDiv);
+        
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Отправка сообщения через AJAX
+    const chatForm = document.getElementById('chat-form');
+    if (chatForm) {
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(chatForm);
+            
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.querySelector('#id_message').value = '';
+                    setTimeout(() => loadMessages(), 500);
+                }
+            })
+            .catch(err => console.log('Error:', err));
+        });
+    }
+    
+    // Открытие/закрытие панели со смайликами
+    const toggleBtn = document.getElementById('emoji-toggle-btn');
+    const emojiPanel = document.getElementById('emoji-panel');
+    
+    if (toggleBtn && emojiPanel) {
+        toggleBtn.addEventListener('click', function() {
+            if (emojiPanel.style.display === 'none') {
+                emojiPanel.style.display = 'block';
+                toggleBtn.textContent = '😊 Скрыть смайлики';
+            } else {
+                emojiPanel.style.display = 'none';
+                toggleBtn.textContent = '😊 Смайлики';
+            }
+        });
+    }
+    
+    // Добавление смайликов в поле ввода
+    const emojiBtns = document.querySelectorAll('.emoji-btn');
+    const messageInput = document.querySelector('#id_message');
+    
+    emojiBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const emoji = this.getAttribute('data-emoji');
+            messageInput.value += emoji;
+            messageInput.focus();
+        });
+    });
+    
+    // Загружаем сообщения и запускаем автообновление
+    loadMessages();
+    setInterval(loadMessages, 3000);
+</script>
+
+<style>
+    .emoji-btn {
+        font-size: 1.2rem;
+        padding: 5px 10px;
+        margin: 2px;
+        transition: transform 0.1s;
+    }
+    .emoji-btn:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}

@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Advertisement, Response
+from .models import Advertisement, Response, Request, Notification
 from .forms import AdvertisementForm, ResponseForm, AdvertisementEditForm
 from events.models import Event
-from .models import Notification
 
 def listing_list(request):
     listings = Advertisement.objects.filter(status='active').order_by('-created_at')
@@ -35,7 +34,7 @@ def create_listing(request):
             listing.author = request.user
             listing.save()
             messages.success(request, 'Объявление успешно создано!')
-            return redirect('listing_detail', pk=listing.pk)
+            return redirect(f'/listings/{listing.pk}/')
     else:
         form = AdvertisementForm(initial=initial)
     return render(request, 'ads/create_listing.html', {'form': form})
@@ -46,14 +45,14 @@ def edit_listing(request, pk):
     
     if listing.author != request.user:
         messages.error(request, 'Вы можете редактировать только свои объявления.')
-        return redirect('listing_detail', pk=pk)
+        return redirect(f'/listings/{pk}/')
     
     if request.method == 'POST':
         form = AdvertisementEditForm(request.POST, instance=listing)
         if form.is_valid():
             form.save()
             messages.success(request, 'Объявление успешно обновлено!')
-            return redirect('listing_detail', pk=pk)
+            return redirect(f'/listings/{pk}/')
     else:
         form = AdvertisementEditForm(instance=listing)
     
@@ -65,15 +64,14 @@ def delete_listing(request, pk):
     
     if listing.author != request.user:
         messages.error(request, 'Вы можете удалять только свои объявления.')
-        return redirect('listing_detail', pk=pk)
+        return redirect(f'/listings/{pk}/')
     
     if request.method == 'POST':
         listing.delete()
         messages.success(request, 'Объявление успешно удалено.')
-        return redirect('listings')
+        return redirect('/listings/')
     
     return render(request, 'ads/confirm_delete.html', {'listing': listing})
-
 
 @login_required
 def create_response(request, pk):
@@ -81,11 +79,11 @@ def create_response(request, pk):
     
     if advertisement.author == request.user:
         messages.error(request, 'Вы не можете откликаться на своё объявление.')
-        return redirect('listing_detail', pk=pk)
+        return redirect(f'/listings/{pk}/')
     
     if Response.objects.filter(advertisement=advertisement, user=request.user).exists():
         messages.error(request, 'Вы уже откликались на это объявление.')
-        return redirect('listing_detail', pk=pk)
+        return redirect(f'/listings/{pk}/')
     
     if request.method == 'POST':
         form = ResponseForm(request.POST)
@@ -95,7 +93,6 @@ def create_response(request, pk):
             response.user = request.user
             response.save()
             
-            # 🔔 СОЗДАЁМ УВЕДОМЛЕНИЕ ДЛЯ АВТОРА ОБЪЯВЛЕНИЯ
             Notification.objects.create(
                 recipient=advertisement.author,
                 sender=request.user,
@@ -105,7 +102,7 @@ def create_response(request, pk):
             )
             
             messages.success(request, 'Ваш отклик отправлен автору объявления!')
-            return redirect('listing_detail', pk=pk)
+            return redirect(f'/listings/{pk}/')
     else:
         form = ResponseForm()
     
@@ -120,7 +117,7 @@ def manage_responses(request, pk):
     
     if advertisement.author != request.user:
         messages.error(request, 'Вы не можете управлять откликами на чужое объявление.')
-        return redirect('listing_detail', pk=pk)
+        return redirect(f'/listings/{pk}/')
     
     responses = advertisement.responses.all().order_by('-created_at')
     return render(request, 'ads/manage_responses.html', {
@@ -135,16 +132,15 @@ def update_response_status(request, pk, status):
     
     if advertisement.author != request.user:
         messages.error(request, 'У вас нет прав для этого действия.')
-        return redirect('listing_detail', pk=advertisement.pk)
+        return redirect(f'/listings/{advertisement.pk}/')
     
     if status not in ['accepted', 'rejected']:
         messages.error(request, 'Некорректный статус.')
-        return redirect('manage_responses', pk=advertisement.pk)
+        return redirect(f'/listings/{advertisement.pk}/responses/')
     
     response.status = status
     response.save()
     
-    # 🔔 СОЗДАЁМ УВЕДОМЛЕНИЕ ДЛЯ ТОГО, КТО ОТКЛИКНУЛСЯ
     if status == 'accepted':
         advertisement.status = 'closed'
         advertisement.save()
@@ -166,7 +162,7 @@ def update_response_status(request, pk, status):
         )
         messages.success(request, f'Вы отклонили отклик от {response.user.username}.')
     
-    return redirect('manage_responses', pk=advertisement.pk)
+    return redirect(f'/listings/{advertisement.pk}/responses/')
 
 @login_required
 def notifications(request):
@@ -178,4 +174,18 @@ def mark_notification_read(request, pk):
     notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
     notification.is_read = True
     notification.save()
-    return redirect('notifications')
+    return redirect('/notifications/')
+
+# ========== КНОПКА "ПОЙДУ С ВАМИ" ==========
+@login_required
+def create_request(request, event_id):
+    from events.models import Event
+    event = get_object_or_404(Event, id=event_id)
+    
+    if not Request.objects.filter(event=event, user=request.user).exists():
+        Request.objects.create(event=event, user=request.user)
+        messages.success(request, f'✅ Вы откликнулись на событие "{event.title}"!')
+    else:
+        messages.warning(request, f'⚠️ Вы уже откликались на событие "{event.title}".')
+    
+    return redirect(f'/events/{event_id}/')

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Event
+from .models import Event, EventChatMessage  # ← добавили импорт
 
 class EventForm(forms.ModelForm):
     # Указываем, что для поля event_date мы будем использовать специальный HTML-виджет для ввода даты и времени
@@ -11,7 +11,7 @@ class EventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        fields = ['title', 'description', 'interest', 'event_date', 'city', 'image'] # image - это наше новое поле
+        fields = ['title', 'description', 'interest', 'event_date', 'city', 'image']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
             'interest': forms.Select(),
@@ -23,4 +23,19 @@ class EventForm(forms.ModelForm):
             'interest': 'Категория интереса',
             'city': 'Город',
             'image': 'Фотография события',
+        }
+
+class ChatMessageForm(forms.ModelForm):
+    class Meta:
+        model = EventChatMessage
+        fields = ['message']
+        widgets = {
+            'message': forms.Textarea(attrs={
+                'rows': 2,
+                'class': 'form-control',
+                'placeholder': 'Напишите сообщение...'
+            })
+        }
+        labels = {
+            'message': '',
         }

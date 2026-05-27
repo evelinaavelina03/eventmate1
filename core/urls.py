@@ -5,7 +5,6 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.conf import settings
 from django.conf.urls.static import static
 
-from events.views import event_list, event_detail, create_event
 from ads.views import listing_list, create_listing, listing_detail, create_response, manage_responses, update_response_status
 from users.views import register, set_interests, profile, edit_profile
 from core.views import home
@@ -20,9 +19,7 @@ urlpatterns = [
     path('set-interests/', set_interests, name='set_interests'),
     
     # Страницы событий
-    path('events/', event_list, name='events'),
-    path('events/<int:event_id>/', event_detail, name='event_detail'),
-    path('events/create/', create_event, name='create_event'),
+    path('events/', include('events.urls')),
     
     # Страницы объявлений
     path('listings/', listing_list, name='listings'),
@@ -42,9 +39,15 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     
-    # Профиль (важен порядок: сначала edit, потом profile с параметром)
+    # Профиль
     path('profile/edit/', edit_profile, name='edit_profile'),
     path('profile/<str:username>/', profile, name='profile'),
+    
+    # Отзывы
+    path('reviews/', include('reviews.urls')),  # ← ДОБАВИТЬ ЭТУ СТРОКУ
+    
+    # Добавляем маршруты для ads
+    path('ads/', include('ads.urls')),
 ]
 
 if settings.DEBUG:

@@ -37,18 +37,37 @@
             <h4>События пользователя</h4>
             {% for event in events %}
                 <div class="card event-card mb-2 p-2">
-                    <a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a> - {{ event.event_date|date:"d.m.Y" }}
+                    <a href="/events/{{ event.pk }}/">{{ event.title }}</a> - {{ event.event_date|date:"d.m.Y" }}
                 </div>
             {% empty %}
                 <p>Нет созданных событий.</p>
             {% endfor %}
+            
             <h4>Объявления о поиске напарника</h4>
             {% for listing in listings %}
                 <div class="card event-card mb-2 p-2">
-                    <a href="{% url 'listing_detail' listing.pk %}">{{ listing.title }}</a>
+                    <a href="/listings/{{ listing.pk }}/">{{ listing.title }}</a>
                 </div>
             {% empty %}
                 <p>Нет объявлений.</p>
+            {% endfor %}
+            
+            <!-- Блок отзывов -->
+            <h4 class="mt-4">📝 Отзывы обо мне</h4>
+            {% for review in profile_user.reviews_received.all %}
+            <div class="card mb-2 p-3">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ review.reviewer.username }}</strong>
+                    <span class="text-warning">
+                        {% for i in "12345"|slice:review.rating %}⭐{% endfor %}
+                    </span>
+                </div>
+                <p class="mb-1"><small>Событие: {{ review.event.title }}</small></p>
+                <p>{{ review.comment|default:"Без комментария" }}</p>
+                <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
+            </div>
+            {% empty %}
+            <p>Пока нет отзывов</p>
             {% endfor %}
         </div>
     </div>

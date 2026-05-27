@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import Event, Status, StatusEvent
-from .forms import EventForm
+from django.http import JsonResponse
+from .models import Event, Status, StatusEvent, EventChatMessage
+from .forms import EventForm, ChatMessageForm
 from users.models import City
 from interests.models import Interest
 
@@ -18,12 +20,10 @@ def format_date_range(date_range_str):
         if len(parts) == 2:
             start = parts[0].strip()
             end = parts[1].strip()
-            # Форматируем start (2026-05-18 → 18.05.2026)
             if len(start) >= 10:
                 start_f = f"{start[8:10]}.{start[5:7]}.{start[0:4]}"
             else:
                 start_f = start
-            # Форматируем end (2026-06-03 → 03.06.2026)
             if len(end) >= 10:
                 end_f = f"{end[8:10]}.{end[5:7]}.{end[0:4]}"
             else:
@@ -58,28 +58,23 @@ def create_event(request):
 def event_list(request):
     events = Event.objects.all().order_by('event_date')
     
-    # Получаем параметры фильтрации
     search_query = request.GET.get('search', '')
     city_name = request.GET.get('city', '')
     interest_name = request.GET.get('interest', '')
     date_range = request.GET.get('date_range', '')
     
-    # Фильтр по поиску
     if search_query:
         events = events.filter(
             Q(title__icontains=search_query) |
             Q(description__icontains=search_query)
         )
     
-    # Фильтр по городу
     if city_name:
         events = events.filter(city__name__icontains=city_name)
     
-    # Фильтр по категории
     if interest_name:
         events = events.filter(interest__name__icontains=interest_name)
     
-    # Фильтр по диапазону дат
     if date_range and ' - ' in date_range:
         dates = date_range.split(' - ')
         if len(dates) == 2:
@@ -90,16 +85,12 @@ def event_list(request):
             if date_to:
                 events = events.filter(event_date__date__lte=date_to)
     
-    # Пагинация
     paginator = Paginator(events, 6)
     page_number = request.GET.get('page')
     events_page = paginator.get_page(page_number)
     
-    # Данные для фильтров
     cities = City.objects.all()
     interests = Interest.objects.all()
-    
-    # Форматируем дату для отображения
     date_range_formatted = format_date_range(date_range)
     
     return render(request, 'events/event_list.html', {
@@ -115,4 +106,71 @@ def event_list(request):
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
-    return render(request, 'events/event_detail.html', {'event': event})
+    is_participant = False
+    if request.user.is_authenticated:
+        is_participant = event.requests.filter(user=request.user).exists()
+    return render(request, 'events/event_detail.html', {
+        'event': event,
+        'is_participant': is_participant,
+    })
+
+# ========== ЧАТ ==========
+@login_required
+def event_chat(request, event_id):
+    print("=== event_chat called ===")
+    print(f"User: {request.user}")
+    print(f"Event ID: {event_id}")
+    
+    event = get_object_or_404(Event, id=event_id)
+    print(f"Event author: {event.author}")
+    
+    # Только участники и организатор могут писать в чат
+    can_chat = (
+        request.user == event.author or 
+        event.requests.filter(user=request.user).exists()
+    )
+    print(f"Can chat: {can_chat}")
+    
+    if not can_chat:
+        messages.error(request, 'Вы можете писать в чат только участников события')
+        return redirect(f'/events/{event.id}/')
+    
+    if request.method == 'POST':
+        form = ChatMessageForm(request.POST)
+        if form.is_valid():
+            msg = form.save(commit=False)
+            msg.event = event
+            msg.user = request.user
+            msg.save()
+            return redirect(f'/events/{event.id}/chat/')
+    else:
+        form = ChatMessageForm()
+    
+    messages_list = event.chat_messages.all()
+    print(f"Messages count: {messages_list.count()}")
+    
+    return render(request, 'events/event_chat.html', {
+        'event': event,
+        'messages': messages_list,
+        'form': form,
+    })
+
+# ========== API ДЛЯ ЧАТА ==========
+@login_required
+def get_messages_api(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    last_id = request.GET.get('last_id', 0)
+    messages = event.chat_messages.filter(id__gt=last_id).order_by('created_at')
+    
+    data = []
+    for msg in messages:
+        data.append({
+            'id': msg.id,
+            'username': msg.user.username,
+            'message': msg.message,
+            'created_at': msg.created_at.strftime('%d.%m.%Y %H:%M'),
+            'is_mine': msg.user == request.user,
+            'avatar': msg.user.avatar.url if msg.user.avatar else None,
+        })
+    
+    return JsonResponse({'messages': data})

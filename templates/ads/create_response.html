@@ -5,13 +5,13 @@
     <div class="card event-card p-4">
         <h2>Отклик на объявление: {{ advertisement.title }}</h2>
         <p><strong>Автор:</strong> {{ advertisement.author.username }}</p>
-        <p><strong>Событие:</strong> <a href="{% url 'event_detail' advertisement.event.pk %}">{{ advertisement.event.title }}</a></p>
+        <p><strong>Событие:</strong> <a href="/events/{{ advertisement.event.pk }}/">{{ advertisement.event.title }}</a></p>
         <hr>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary-oval btn-oval">Отправить отклик</button>
-            <a href="{% url 'listing_detail' advertisement.pk %}" class="btn btn-secondary-oval btn-oval">Отмена</a>
+            <a href="/listings/{{ advertisement.pk }}/" class="btn btn-secondary-oval btn-oval">Отмена</a>
         </form>
     </div>
 </div>
