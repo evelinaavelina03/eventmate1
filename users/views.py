@@ -6,14 +6,15 @@ from .forms import UserRegistrationForm, UserEditForm
 from interests.models import Interest
 from .models import User, UserInterest
 from events.models import Event
+from ads.models import Advertisement, Response   # добавили импорты
 
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
-        form = UserEditForm(request.POST, request.FILES, instance=request.user)  # ← ДОБАВЛЕНО request.FILES
+        form = UserEditForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Профиль успешно обновлён!')  # ← ДОБАВЛЕНО сообщение
+            messages.success(request, 'Профиль успешно обновлён!')
             return redirect('profile', username=request.user.username)
     else:
         form = UserEditForm(instance=request.user)
@@ -25,13 +26,31 @@ def profile(request, username=None):
         user = get_object_or_404(User, username=username)
     else:
         user = request.user
+    
     events = Event.objects.filter(author=user).order_by('-created_at')
-    # Пока без объявлений, добавим позже
-    listings = []
+    listings = Advertisement.objects.filter(author=user).order_by('-created_at')
+    
+    # Проверка, может ли текущий пользователь видеть контакты
+    can_see_contacts = False
+    if request.user.is_authenticated and request.user != user:
+        # Проверяем, есть ли взаимный отклик (текущий пользователь откликался на объявление автора или наоборот)
+        has_response_from_me = Response.objects.filter(
+            advertisement__author=user, 
+            user=request.user, 
+            status='accepted'
+        ).exists()
+        has_response_to_me = Response.objects.filter(
+            advertisement__author=request.user, 
+            user=user, 
+            status='accepted'
+        ).exists()
+        can_see_contacts = has_response_from_me or has_response_to_me
+    
     return render(request, 'users/profile.html', {
         'profile_user': user,
         'events': events,
         'listings': listings,
+        'can_see_contacts': can_see_contacts,
     })
 
 @login_required

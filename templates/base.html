@@ -52,6 +52,15 @@
                         <li class="nav-item"><a class="nav-link" href="/listings/create/">+ Новое объявление</a></li>
                         <li class="nav-item"><a class="nav-link" href="/events/create/">+ Создать событие</a></li>
                         <li class="nav-item"><a class="nav-link" href="/profile/{{ user.username }}/">{{ user.username }}</a></li>
+                        <!-- Иконка уведомлений -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'notifications' %}">
+                                <i class="fas fa-bell"></i>
+                                {% if user.unread_notifications_count > 0 %}
+                                    <span class="badge bg-danger">{{ user.unread_notifications_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <form method="post" action="/logout/" style="display: inline;">
                                 {% csrf_token %}
