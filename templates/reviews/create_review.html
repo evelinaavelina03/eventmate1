@@ -1,0 +1,25 @@
+
+{% extends "base.html" %}
+{% block title %}Оставить отзыв{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card event-card p-4">
+        <h2>Отзыв о пользователе <span style="color: #ff6b6b;">{{ reviewed.username }}</span></h2>
+        <p><strong>Событие:</strong> {{ event.title }}</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-bold">{{ form.rating.label }}:</label>
+                {{ form.rating }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">{{ form.comment.label }}:</label>
+                {{ form.comment }}
+            </div>
+            <button type="submit" class="btn btn-primary-oval">⭐ Отправить отзыв</button>
+            <a href="{% url 'events:event_detail' event.id %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

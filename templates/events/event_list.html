@@ -6,6 +6,65 @@
 <div class="container mt-4">
     <h1 class="text-center mb-4" style="color: #ff6b6b;">🎉 Все события</h1>
     
+    <!-- Блок фильтрации -->
+    <div class="card mb-4 p-4" style="border-radius: 20px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+        <h3 class="mb-3">🔍 Поиск и фильтрация</h3>
+        <form method="get" class="row g-3" id="filter-form">
+            <div class="col-md-12">
+                <input type="text" name="search" class="form-control" placeholder="🔎 Поиск по названию или описанию..." value="{{ search_query }}" style="border-radius: 30px; padding: 12px 20px;">
+            </div>
+            
+            <!-- Город: ввод + выбор из списка -->
+            <div class="col-md-4">
+                <input type="text" name="city" list="city-list" class="form-control" placeholder="📍 Введите или выберите город..." value="{{ city_name }}" style="border-radius: 30px; padding: 12px 20px;">
+                <datalist id="city-list">
+                    {% for city in cities %}
+                    <option value="{{ city.name }}">{{ city.name }}</option>
+                    {% endfor %}
+                </datalist>
+            </div>
+            
+            <!-- Категория: ввод + выбор из списка -->
+            <div class="col-md-4">
+                <input type="text" name="interest" list="interest-list" class="form-control" placeholder="🏷️ Введите или выберите категорию..." value="{{ selected_interest_name }}" style="border-radius: 30px; padding: 12px 20px;">
+                <datalist id="interest-list">
+                    {% for interest in interests %}
+                    <option value="{{ interest.name }}">{{ interest.name }}</option>
+                    {% endfor %}
+                </datalist>
+            </div>
+            
+            <!-- Диапазон дат: календарь (ОВАЛЬНЫЙ) -->
+            <div class="col-md-4">
+                <input type="text" name="date_range" id="date_range" class="form-control" placeholder="📅 Выберите диапазон дат" value="{{ date_range }}" style="border-radius: 30px !important; padding: 12px 20px !important; cursor: pointer;">
+            </div>
+            
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary-oval me-2" style="border-radius: 30px; padding: 12px 30px;">
+                    <i class="fas fa-search"></i> Применить
+                </button>
+                <a href="/events/" class="btn btn-outline-secondary" style="border-radius: 30px; padding: 12px 30px;">
+                    <i class="fas fa-undo"></i> Сбросить
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Показываем активные фильтры -->
+    {% if search_query or city_name or selected_interest_name or date_range_formatted %}
+    <div class="alert alert-info mb-3" style="border-radius: 20px;">
+        <i class="fas fa-filter"></i> <strong>Активные фильтры:</strong>
+        {% if search_query %} 🔍 "{{ search_query }}" {% endif %}
+        {% if city_name %} 📍 "{{ city_name }}" {% endif %}
+        {% if selected_interest_name %} 🏷️ "{{ selected_interest_name }}" {% endif %}
+        {% if date_range_formatted %} 📅 {{ date_range_formatted }}{% endif %}
+        <a href="/events/" class="float-end text-decoration-none">✖️ Сбросить всё</a>
+    </div>
+    {% endif %}
+
+    <!-- Количество найденных событий -->
+    <p class="text-muted mb-3">Найдено событий: {{ events.paginator.count }}</p>
+    
     <div class="row">
         {% for event in events %}
         <div class="col-md-6 col-lg-4 mb-4">
@@ -31,8 +90,10 @@
         </div>
         {% empty %}
         <div class="col-12 text-center py-5">
-            <h3>Пока нет мероприятий</h3>
-            <p>Стань первым, кто создаст событие!</p>
+            <i class="fas fa-calendar-times fa-4x" style="color: #ccc;"></i>
+            <h3 class="mt-3">По вашему запросу ничего не найдено</h3>
+            <p>Попробуйте изменить параметры поиска или сбросить фильтры</p>
+            <a href="/events/" class="btn btn-primary-oval">Сбросить фильтры</a>
         </div>
         {% endfor %}
     </div>
@@ -43,7 +104,7 @@
         <ul class="pagination justify-content-center">
             {% if events.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ events.previous_page_number }}">← Назад</a>
+                <a class="page-link" href="?page={{ events.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">← Назад</a>
             </li>
             {% else %}
             <li class="page-item disabled">
@@ -57,7 +118,7 @@
 
             {% if events.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ events.next_page_number }}">Вперёд →</a>
+                <a class="page-link" href="?page={{ events.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">Вперёд →</a>
             </li>
             {% else %}
             <li class="page-item disabled">
@@ -68,4 +129,41 @@
     </nav>
     {% endif %}
 </div>
+
+<style>
+    /* Принудительно делаем поле с датой овальным */
+    #date_range,
+    .flatpickr-input {
+        border-radius: 30px !important;
+        padding: 12px 20px !important;
+    }
+</style>
+
+<script>
+    // Ждём полной загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        var dateRangeInput = document.getElementById('date_range');
+        if (dateRangeInput) {
+            flatpickr(dateRangeInput, {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                locale: "ru",
+                altInput: true,
+                altFormat: "d.m.Y",
+                allowInput: false,
+                clickOpens: true,
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 2) {
+                        var start = selectedDates[0].toISOString().split('T')[0];
+                        var end = selectedDates[1].toISOString().split('T')[0];
+                        dateRangeInput.value = start + ' - ' + end;
+                    } else if (selectedDates.length === 1) {
+                        var single = selectedDates[0].toISOString().split('T')[0];
+                        dateRangeInput.value = single;
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
