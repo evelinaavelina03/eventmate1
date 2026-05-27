@@ -2,20 +2,26 @@
 {% block title %}Объявления о поиске напарника{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h1>Объявления</h1>
-    <div class="row">
-        {% for listing in listings %}
-        <div class="col-md-6 mb-4">
-            <div class="event-card p-3">
-                <h4>{{ listing.title }}</h4>
-                <p>Событие: {{ listing.event.title }}</p>
-                <p>Ищу: {{ listing.looking_for|default:"напарника" }}</p>
-                <a href="#" class="btn btn-primary-oval btn-oval">Откликнуться</a>
+    <h1>Объявления о поиске напарника</h1>
+    {% if listings %}
+        <div class="row">
+            {% for listing in listings %}
+            <div class="col-md-6 mb-4">
+                <div class="card event-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ listing.title }}</h5>
+                        <p class="card-text">{{ listing.description|truncatewords:30 }}</p>
+                        <p><strong>Событие:</strong> <a href="{% url 'event_detail' listing.event.pk %}">{{ listing.event.title }}</a></p>
+                        <p><strong>Автор:</strong> {{ listing.author.username }}</p>
+                        <p><strong>Нужно напарников:</strong> {{ listing.companions_needed }}</p>
+                        <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <p>Пока нет объявлений. Создайте первое!</p>
-        {% endfor %}
-    </div>
+    {% else %}
+        <p>Пока нет объявлений. <a href="{% url 'create_listing' %}">Создайте первое!</a></p>
+    {% endif %}
 </div>
 {% endblock %}
