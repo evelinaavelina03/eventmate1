@@ -5,7 +5,7 @@
     <div class="card event-card p-4">
         <h1>{{ listing.title }}</h1>
         <p><strong>Событие:</strong> <a href="{% url 'event_detail' listing.event.pk %}">{{ listing.event.title }}</a></p>
-        <p><strong>Автор:</strong> {{ listing.author.username }}</p>
+        <p><strong>Автор:</strong> <a href="{% url 'profile' username=listing.author.username %}">{{ listing.author.username }}</a></p>
         <p><strong>Нужно напарников:</strong> {{ listing.companions_needed }}</p>
         <p><strong>Описание:</strong></p>
         <p>{{ listing.description|linebreaks }}</p>

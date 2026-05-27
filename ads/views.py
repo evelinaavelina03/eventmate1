@@ -4,6 +4,7 @@ from django.contrib import messages
 from .models import Advertisement, Response
 from .forms import AdvertisementForm, ResponseForm, AdvertisementEditForm
 from events.models import Event
+from .models import Notification
 
 def listing_list(request):
     listings = Advertisement.objects.filter(status='active').order_by('-created_at')
@@ -73,6 +74,7 @@ def delete_listing(request, pk):
     
     return render(request, 'ads/confirm_delete.html', {'listing': listing})
 
+
 @login_required
 def create_response(request, pk):
     advertisement = get_object_or_404(Advertisement, pk=pk)
@@ -92,6 +94,16 @@ def create_response(request, pk):
             response.advertisement = advertisement
             response.user = request.user
             response.save()
+            
+            # 🔔 СОЗДАЁМ УВЕДОМЛЕНИЕ ДЛЯ АВТОРА ОБЪЯВЛЕНИЯ
+            Notification.objects.create(
+                recipient=advertisement.author,
+                sender=request.user,
+                notification_type='response',
+                advertisement=advertisement,
+                message=f'{request.user.username} откликнулся(ась) на ваше объявление "{advertisement.title}".'
+            )
+            
             messages.success(request, 'Ваш отклик отправлен автору объявления!')
             return redirect('listing_detail', pk=pk)
     else:
@@ -132,11 +144,38 @@ def update_response_status(request, pk, status):
     response.status = status
     response.save()
     
+    # 🔔 СОЗДАЁМ УВЕДОМЛЕНИЕ ДЛЯ ТОГО, КТО ОТКЛИКНУЛСЯ
     if status == 'accepted':
         advertisement.status = 'closed'
         advertisement.save()
+        Notification.objects.create(
+            recipient=response.user,
+            sender=request.user,
+            notification_type='response_accepted',
+            advertisement=advertisement,
+            message=f'Автор объявления "{advertisement.title}" принял(а) ваш отклик.'
+        )
         messages.success(request, f'Вы приняли отклик от {response.user.username}. Объявление закрыто.')
     else:
+        Notification.objects.create(
+            recipient=response.user,
+            sender=request.user,
+            notification_type='response_rejected',
+            advertisement=advertisement,
+            message=f'Автор объявления "{advertisement.title}" отклонил(а) ваш отклик.'
+        )
         messages.success(request, f'Вы отклонили отклик от {response.user.username}.')
     
     return redirect('manage_responses', pk=advertisement.pk)
+
+@login_required
+def notifications(request):
+    notifications = request.user.notifications.all()
+    return render(request, 'ads/notifications.html', {'notifications': notifications})
+
+@login_required
+def mark_notification_read(request, pk):
+    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    notification.is_read = True
+    notification.save()
+    return redirect('notifications')

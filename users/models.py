@@ -28,6 +28,10 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['email']
 
+    def unread_notifications_count(self):
+        from ads.models import Notification
+        return Notification.objects.filter(recipient=self, is_read=False).count()
+
     def __str__(self):
         return self.username
 
