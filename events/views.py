@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from .models import Event, Status, StatusEvent
 from .forms import EventForm
 
@@ -20,13 +21,16 @@ def create_event(request):
                 status_event = StatusEvent.objects.create(name='in_process')
             event.status_event = status_event
             event.save()
-            return redirect('event_detail', event_id=event.pk)
+            return redirect(f'/events/{event.pk}/')
     else:
         form = EventForm()
     return render(request, 'events/create_event.html', {'form': form})
 
 def event_list(request):
-    events = Event.objects.all().order_by('event_date')
+    all_events = Event.objects.all().order_by('event_date')
+    paginator = Paginator(all_events, 6)  # 6 событий на страницу
+    page_number = request.GET.get('page')
+    events = paginator.get_page(page_number)
     return render(request, 'events/event_list.html', {'events': events})
 
 def event_detail(request, event_id):

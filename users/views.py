@@ -1,18 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegistrationForm
+from django.contrib import messages
+from .forms import UserRegistrationForm, UserEditForm
 from interests.models import Interest
 from .models import User, UserInterest
 from events.models import Event
-from .forms import UserEditForm
 
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=request.user)
+        form = UserEditForm(request.POST, request.FILES, instance=request.user)  # ← ДОБАВЛЕНО request.FILES
         if form.is_valid():
             form.save()
+            messages.success(request, 'Профиль успешно обновлён!')  # ← ДОБАВЛЕНО сообщение
             return redirect('profile', username=request.user.username)
     else:
         form = UserEditForm(instance=request.user)

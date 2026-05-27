@@ -62,3 +62,11 @@ class Event(models.Model):
     
     def __str__(self):
         return self.title
+    
+    def get_participants_count(self):
+        """Возвращает количество участников (откликов) на событие"""
+        return self.requests.count()
+    
+    def get_participants(self):
+        """Возвращает список участников события"""
+        return [request.user for request in self.requests.all()]

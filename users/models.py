@@ -23,7 +23,8 @@ class User(AbstractUser):
     rating = models.ForeignKey(Rating, on_delete=models.SET_NULL, null=True, blank=True, db_column='rating_id')
     created_at = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(unique=True)
-    rating_avg = models.FloatField(default=0.0, verbose_name="Средний рейтинг")   # новое поле
+    rating_avg = models.FloatField(default=0.0, verbose_name="Средний рейтинг")
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name="Аватар")
 
     REQUIRED_FIELDS = ['email']
 

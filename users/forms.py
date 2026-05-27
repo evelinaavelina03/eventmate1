@@ -6,7 +6,7 @@ from .models import User, City
 class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'phone', 'birth_date', 'city']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'birth_date', 'city', 'avatar']
         widgets = {
             'birth_date': forms.DateInput(attrs={'type': 'date'}),
             'city': forms.Select(),

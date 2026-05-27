@@ -1,39 +1,71 @@
 {% extends "base.html" %}
-{% block title %}События{% endblock %}
+
+{% block title %}События | EventMate{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h1>События</h1>
-    {% if events %}
-        <div class="row">
-            {% for event in events %}
-            <div class="col-md-4 mb-4">
-                <div class="card event-card h-100">
-                    {% if event.image %}
-                        <img src="{{ event.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-                    {% else %}
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                            <i class="fas fa-image fa-3x text-secondary"></i>
-                        </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ event.title }}</h5>
-                        <p class="card-text">
-                            {{ event.event_date|date:"d.m.Y H:i" }}<br>
-                            {{ event.city.name }}<br>
-                            Категория: {{ event.interest.name }}
-                        </p>
-                        {% if event.pk %}
-                            <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
-                        {% else %}
-                            <span class="btn btn-secondary btn-oval disabled">Ошибка ID</span>
-                        {% endif %}
-                    </div>
+    <h1 class="text-center mb-4" style="color: #ff6b6b;">🎉 Все события</h1>
+    
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="event-card p-3 h-100">
+                {% if event.image %}
+                <img src="{{ event.image.url }}" class="card-img-top mb-3" alt="{{ event.title }}" style="height: 180px; object-fit: cover; border-radius: 15px;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center mb-3" style="height: 180px; border-radius: 15px;">
+                    <i class="fas fa-image fa-3x text-secondary"></i>
                 </div>
+                {% endif %}
+                <h4>{{ event.title }}</h4>
+                <p class="text-muted">{{ event.description|truncatewords:20 }}</p>
+                
+                <div class="mt-2">
+                    <p><i class="fas fa-calendar-day"></i> {{ event.event_date|date:"d.m.Y H:i"|default:"Дата не указана" }}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ event.city.name|default:"Город не указан" }}</p>
+                    <p><i class="fas fa-user"></i> {{ event.author.username }}</p>
+                </div>
+                
+                <a href="/events/{{ event.pk }}/" class="btn btn-primary-oval btn-oval w-100 mt-2">Подробнее →</a>
             </div>
-            {% endfor %}
         </div>
-    {% else %}
-        <p>Нет событий.</p>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <h3>Пока нет мероприятий</h3>
+            <p>Стань первым, кто создаст событие!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация Назад / Вперёд -->
+    {% if events.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if events.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ events.previous_page_number }}">← Назад</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">← Назад</span>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">{{ events.number }} / {{ events.paginator.num_pages }}</span>
+            </li>
+
+            {% if events.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ events.next_page_number }}">Вперёд →</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Вперёд →</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
     {% endif %}
 </div>
 {% endblock %}

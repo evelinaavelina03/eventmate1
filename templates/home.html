@@ -1,81 +1,254 @@
 {% extends "base.html" %}
-{% block title %}Главная{% endblock %}
+{% load static %}
+
+{% block title %}Главная | EventMate{% endblock %}
+
 {% block content %}
+<style>
+    /* Hero секция в стиле Carbonex */
+    .hero-section {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border-radius: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+    
+    .hero-title span {
+        color: #ff6b6b;
+        position: relative;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #6c757d;
+        max-width: 600px;
+        margin: 0 auto 30px;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ff6b6b;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .btn-primary-oval {
+        background: #ff6b6b;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 30px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary-oval:hover {
+        background: #ff5252;
+        transform: translateY(-2px);
+    }
+    
+    .event-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        height: 100%;
+        border: none;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(255,107,107,0.15);
+    }
+    
+    .event-card .card-body {
+        padding: 20px;
+    }
+    
+    .event-card .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    
+    .event-card .card-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+    
+    .event-card .card-text i {
+        width: 20px;
+        color: #ff6b6b;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 30px;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: #ff6b6b;
+    }
+    
+    .alert-custom {
+        background: #fff3f3;
+        border: none;
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .alert-custom a {
+        color: #ff6b6b;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .alert-custom a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<!-- Hero секция -->
 <div class="container mt-4">
-    <div class="text-center py-5">
-        <h1 class="display-4 fw-bold" style="color: #ff6b6b;">Найди попутчика на событие</h1>
-        <p class="lead mt-3">Персональная подборка событий по вашим интересам</p>
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1 class="hero-title">
+                МЫ <span>ОБЪЕДИНЯЕМ</span><br>
+                ЛЮДЕЙ
+            </h1>
+            <p class="hero-subtitle">
+                EventMate помогает найти идеального напарника для концертов, кино,<br>
+                фестивалей и любых мероприятий. Больше никакого одиночества.
+            </p>
+            <div class="mt-3">
+                <a href="/events/" class="btn btn-primary-oval me-2">🎉 СМОТРЕТЬ СОБЫТИЯ</a>
+                <a href="/events/create/" class="btn btn-outline-secondary rounded-pill px-4" style="border-color: #ff6b6b; color: #ff6b6b;">✨ СОЗДАТЬ СОБЫТИЕ</a>
+            </div>
+            
+            <!-- Реальная статистика из базы данных -->
+            <div class="row mt-5 pt-3">
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">{{ events_count }}</div>
+                    <div class="stat-label">СОБЫТИЙ СОЗДАНО</div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">{{ users_count }}</div>
+                    <div class="stat-label">АКТИВНЫХ ПОЛЬЗОВАТЕЛЕЙ</div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">{{ avg_rating|default:"0" }}</div>
+                    <div class="stat-label">★ СРЕДНИЙ РЕЙТИНГ</div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">{{ cities_count }}</div>
+                    <div class="stat-label">ГОРОДОВ</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     {% if user.is_authenticated %}
-        <h2 class="mb-4">Рекомендованные события</h2>
+        <h2 class="section-title">✨ Рекомендованные события</h2>
         {% if events %}
             <div class="row">
                 {% for event in events %}
-                <div class="col-md-4 mb-4">
+                <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card event-card h-100">
                         {% if event.image %}
-                            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
                         {% else %}
                             <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <i class="fas fa-image fa-3x text-secondary"></i>
+                                <i class="fas fa-calendar-alt fa-3x text-secondary"></i>
                             </div>
                         {% endif %}
                         <div class="card-body">
-                            <h5 class="card-title">{{ event.title }}</h5>
-                            <p class="card-text">
-                                {{ event.event_date|date:"d.m.Y H:i" }}<br>
-                                {{ event.city.name }}<br>
-                                Категория: {{ event.interest.name }}
-                            </p>
-                            {% if event.pk %}
-                                <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
-                            {% else %}
-                                <span class="btn btn-secondary btn-oval disabled">Нет ID</span>
-                            {% endif %}
+                            <h5 class="card-title">{{ event.title|truncatechars:40 }}</h5>
+                            <div class="card-text">
+                                <p><i class="fas fa-calendar-day"></i> {{ event.event_date|date:"d.m.Y H:i"|default:"Дата не указана" }}</p>
+                                <p><i class="fas fa-map-marker-alt"></i> {{ event.city.name|default:"Город не указан" }}</p>
+                                <p><i class="fas fa-tag"></i> {{ event.interest.name|default:"Без категории" }}</p>
+                                <p><i class="fas fa-users"></i> {{ event.get_participants_count }} участников</p>
+                            </div>
+                            <a href="/events/{{ event.pk }}/" class="btn btn-primary-oval w-100">Подробнее →</a>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p>Пока нет событий по вашим интересам. <a href="{% url 'set_interests' %}">Изменить интересы</a> или добавьте новые события через админку.</p>
+            <div class="alert-custom">
+                <i class="fas fa-info-circle fa-2x mb-2" style="color: #ff6b6b;"></i>
+                <p>Пока нет событий по вашим интересам.</p>
+                <a href="{% url 'set_interests' %}">Изменить интересы →</a>
+            </div>
         {% endif %}
     {% else %}
-        <div class="alert alert-info">
-            <a href="{% url 'login' %}" class="btn btn-link">Войдите</a> или <a href="{% url 'register' %}" class="btn btn-link">зарегистрируйтесь</a>, чтобы видеть персональную подборку.
+        <div class="alert-custom">
+            <i class="fas fa-heart fa-2x mb-2" style="color: #ff6b6b;"></i>
+            <p class="mb-0">
+                <a href="{% url 'login' %}">Войдите</a> или 
+                <a href="{% url 'register' %}">зарегистрируйтесь</a>, 
+                чтобы видеть персональную подборку событий по вашим интересам!
+            </p>
         </div>
-        <h2>Ближайшие события</h2>
+        
+        <h2 class="section-title mt-4">🎉 Ближайшие события</h2>
         {% if events %}
             <div class="row">
                 {% for event in events %}
-                <div class="col-md-4 mb-4">
+                <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card event-card h-100">
                         {% if event.image %}
-                            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
                         {% else %}
                             <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <i class="fas fa-image fa-3x text-secondary"></i>
+                                <i class="fas fa-calendar-alt fa-3x text-secondary"></i>
                             </div>
                         {% endif %}
                         <div class="card-body">
-                            <h5 class="card-title">{{ event.title }}</h5>
-                            <p class="card-text">
-                                {{ event.event_date|date:"d.m.Y H:i" }}<br>
-                                {{ event.city.name }}
-                            </p>
-                            {% if event.pk %}
-                                <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary-oval btn-oval">Подробнее</a>
-                            {% else %}
-                                <span class="btn btn-secondary btn-oval disabled">Нет ID</span>
-                            {% endif %}
+                            <h5 class="card-title">{{ event.title|truncatechars:40 }}</h5>
+                            <div class="card-text">
+                                <p><i class="fas fa-calendar-day"></i> {{ event.event_date|date:"d.m.Y H:i"|default:"Дата не указана" }}</p>
+                                <p><i class="fas fa-map-marker-alt"></i> {{ event.city.name|default:"Город не указан" }}</p>
+                                <p><i class="fas fa-users"></i> {{ event.get_participants_count }} участников</p>
+                            </div>
+                            <a href="/events/{{ event.pk }}/" class="btn btn-primary-oval w-100">Подробнее →</a>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p>Пока нет событий. Зайдите в админку и добавьте несколько мероприятий.</p>
+            <div class="alert-custom">
+                <i class="fas fa-calendar-times fa-2x mb-2" style="color: #ff6b6b;"></i>
+                <p>Пока нет событий. Зайдите в админку и добавьте несколько мероприятий.</p>
+            </div>
         {% endif %}
     {% endif %}
 </div>
