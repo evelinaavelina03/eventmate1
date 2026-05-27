@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Управление откликами{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card event-card p-4">
+        <h2>Отклики на объявление: {{ advertisement.title }}</h2>
+        <p><a href="{% url 'listing_detail' advertisement.pk %}">Вернуться к объявлению</a></p>
+        
+        {% if responses %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Пользователь</th>
+                            <th>Сообщение</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for response in responses %}
+                        <tr>
+                            <td>{{ response.user.username }}</td>
+                            <td>{{ response.message|truncatewords:20 }}</td>
+                            <td>{{ response.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if response.status == 'pending' %}bg-warning
+                                    {% elif response.status == 'accepted' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ response.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if response.status == 'pending' %}
+                                    <a href="{% url 'update_response_status' response.pk 'accepted' %}" class="btn btn-sm btn-success">Принять</a>
+                                    <a href="{% url 'update_response_status' response.pk 'rejected' %}" class="btn btn-sm btn-danger">Отклонить</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Пока нет откликов на это объявление.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card event-card p-4">
+        <h1>{{ listing.title }}</h1>
+        <p><strong>Событие:</strong> <a href="{% url 'event_detail' listing.event.pk %}">{{ listing.event.title }}</a></p>
+        <p><strong>Автор:</strong> {{ listing.author.username }}</p>
+        <p><strong>Нужно напарников:</strong> {{ listing.companions_needed }}</p>
+        <p><strong>Описание:</strong></p>
+        <p>{{ listing.description|linebreaks }}</p>
+        <p><strong>Дата создания:</strong> {{ listing.created_at|date:"d.m.Y H:i" }}</p>
+        
+        {% if user.is_authenticated %}
+            {% if user == listing.author %}
+                <div class="mt-3">
+                    <a href="{% url 'edit_listing' listing.pk %}" class="btn btn-secondary-oval btn-oval">Редактировать</a>
+                    <a href="{% url 'delete_listing' listing.pk %}" class="btn btn-danger btn-oval">Удалить</a>
+                    <a href="{% url 'manage_responses' listing.pk %}" class="btn btn-secondary-oval btn-oval">Управление откликами</a>
+                </div>
+            {% else %}
+                {% if has_responded %}
+                    <button class="btn btn-secondary btn-oval mt-2" disabled>Вы уже откликнулись</button>
+                {% else %}
+                    <a href="{% url 'create_response' listing.pk %}" class="btn btn-success btn-oval mt-2">Откликнуться</a>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-success btn-oval mt-2">Войдите, чтобы откликнуться</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

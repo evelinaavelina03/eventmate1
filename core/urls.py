@@ -9,6 +9,7 @@ from events.views import event_list, event_detail, create_event
 from ads.views import listing_list, create_listing, listing_detail, create_response, manage_responses, update_response_status
 from users.views import register, set_interests, profile, edit_profile
 from core.views import home
+from ads.views import edit_listing, delete_listing
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +27,8 @@ urlpatterns = [
     path('listings/', listing_list, name='listings'),
     path('listings/create/', create_listing, name='create_listing'),
     path('listings/<int:pk>/', listing_detail, name='listing_detail'),
+    path('listings/<int:pk>/edit/', edit_listing, name='edit_listing'),
+    path('listings/<int:pk>/delete/', delete_listing, name='delete_listing'),
     
     # Отклики на объявления
     path('listings/<int:pk>/respond/', create_response, name='create_response'),

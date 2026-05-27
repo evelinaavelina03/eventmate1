@@ -2,11 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Advertisement, Response
-from .forms import AdvertisementForm, ResponseForm
+from .forms import AdvertisementForm, ResponseForm, AdvertisementEditForm
 from events.models import Event
 
 def listing_list(request):
-    """Список всех активных объявлений"""
     listings = Advertisement.objects.filter(status='active').order_by('-created_at')
     return render(request, 'ads/listing_list.html', {'listings': listings})
 
@@ -14,7 +13,6 @@ def listing_detail(request, pk):
     listing = get_object_or_404(Advertisement, pk=pk)
     has_responded = False
     if request.user.is_authenticated:
-        # Проверяем, есть ли уже отклик от этого пользователя на это объявление
         has_responded = Response.objects.filter(advertisement=listing, user=request.user).exists()
     return render(request, 'ads/listing_detail.html', {
         'listing': listing,
@@ -23,8 +21,6 @@ def listing_detail(request, pk):
 
 @login_required
 def create_listing(request):
-    """Создание нового объявления"""
-    # Если передан параметр event, предзаполняем поле
     event_id = request.GET.get('event')
     initial = {}
     if event_id:
@@ -44,16 +40,47 @@ def create_listing(request):
     return render(request, 'ads/create_listing.html', {'form': form})
 
 @login_required
+def edit_listing(request, pk):
+    listing = get_object_or_404(Advertisement, pk=pk)
+    
+    if listing.author != request.user:
+        messages.error(request, 'Вы можете редактировать только свои объявления.')
+        return redirect('listing_detail', pk=pk)
+    
+    if request.method == 'POST':
+        form = AdvertisementEditForm(request.POST, instance=listing)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Объявление успешно обновлено!')
+            return redirect('listing_detail', pk=pk)
+    else:
+        form = AdvertisementEditForm(instance=listing)
+    
+    return render(request, 'ads/edit_listing.html', {'form': form, 'listing': listing})
+
+@login_required
+def delete_listing(request, pk):
+    listing = get_object_or_404(Advertisement, pk=pk)
+    
+    if listing.author != request.user:
+        messages.error(request, 'Вы можете удалять только свои объявления.')
+        return redirect('listing_detail', pk=pk)
+    
+    if request.method == 'POST':
+        listing.delete()
+        messages.success(request, 'Объявление успешно удалено.')
+        return redirect('listings')
+    
+    return render(request, 'ads/confirm_delete.html', {'listing': listing})
+
+@login_required
 def create_response(request, pk):
-    """Создание отклика на объявление"""
     advertisement = get_object_or_404(Advertisement, pk=pk)
     
-    # Нельзя откликаться на своё объявление
     if advertisement.author == request.user:
         messages.error(request, 'Вы не можете откликаться на своё объявление.')
         return redirect('listing_detail', pk=pk)
     
-    # Проверяем, не откликался ли уже пользователь
     if Response.objects.filter(advertisement=advertisement, user=request.user).exists():
         messages.error(request, 'Вы уже откликались на это объявление.')
         return redirect('listing_detail', pk=pk)
@@ -77,10 +104,8 @@ def create_response(request, pk):
 
 @login_required
 def manage_responses(request, pk):
-    """Управление откликами на своё объявление (только для автора)"""
     advertisement = get_object_or_404(Advertisement, pk=pk)
     
-    # Проверяем, что текущий пользователь — автор
     if advertisement.author != request.user:
         messages.error(request, 'Вы не можете управлять откликами на чужое объявление.')
         return redirect('listing_detail', pk=pk)
@@ -93,11 +118,9 @@ def manage_responses(request, pk):
 
 @login_required
 def update_response_status(request, pk, status):
-    """Обновление статуса отклика (принять/отклонить)"""
     response = get_object_or_404(Response, pk=pk)
     advertisement = response.advertisement
     
-    # Только автор объявления может менять статус
     if advertisement.author != request.user:
         messages.error(request, 'У вас нет прав для этого действия.')
         return redirect('listing_detail', pk=advertisement.pk)
@@ -109,7 +132,6 @@ def update_response_status(request, pk, status):
     response.status = status
     response.save()
     
-    # Если статус "accepted", можно закрыть объявление (опционально)
     if status == 'accepted':
         advertisement.status = 'closed'
         advertisement.save()
