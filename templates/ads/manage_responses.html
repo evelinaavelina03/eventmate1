@@ -21,7 +21,7 @@
                     <tbody>
                         {% for response in responses %}
                         <tr>
-                            <td>{{ response.user.username }}</td>
+                            <td><a href="{% url 'profile' username=response.user.username %}">{{ response.user.username }}</a></td>
                             <td>{{ response.message|truncatewords:20 }}</td>
                             <td>{{ response.created_at|date:"d.m.Y H:i" }}</td>
                             <td>

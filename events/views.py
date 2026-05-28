@@ -8,8 +8,10 @@ from datetime import timedelta
 from django.http import JsonResponse
 from .models import Event, Status, StatusEvent, EventChatMessage
 from .forms import EventForm, ChatMessageForm
-from users.models import City
+from users.models import City, User
 from interests.models import Interest
+from reviews.models import Review
+from ads.models import Response
 
 def format_date_range(date_range_str):
     """Форматирует дату из формата YYYY-MM-DD в DD.MM.YYYY"""
@@ -107,11 +109,56 @@ def event_list(request):
 def event_detail(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
     is_participant = False
+    user_has_reviewed_author = False
+    now = timezone.now()
+    
+    if event.event_date:
+        is_past_event = event.event_date < now
+    else:
+        is_past_event = False
+    
+    is_not_author = False
+    companions = []
+    reviewed_companions_ids = []
+    
     if request.user.is_authenticated:
         is_participant = event.requests.filter(user=request.user).exists()
+        is_not_author = request.user != event.author
+        user_has_reviewed_author = Review.objects.filter(
+            reviewer=request.user,
+            reviewed=event.author,
+            event=event
+        ).exists()
+        
+        # Находим напарников (принятые отклики)
+        if is_past_event:
+            companion_ids = Response.objects.filter(
+                advertisement__event=event,
+                status='accepted'
+            ).filter(
+                Q(user=request.user) | Q(advertisement__author=request.user)
+            ).exclude(
+                user=request.user
+            ).values_list('user', flat=True).distinct()
+            
+            companions = User.objects.filter(pk__in=companion_ids)
+            
+            # Проверяем, на кого уже оставлены отзывы
+            reviewed_companions_ids = Review.objects.filter(
+                reviewer=request.user,
+                reviewed__in=companions,
+                event=event
+            ).values_list('reviewed_id', flat=True)
+    
     return render(request, 'events/event_detail.html', {
         'event': event,
         'is_participant': is_participant,
+        'now': now,
+        'is_past_event': is_past_event,
+        'is_not_author': is_not_author,
+        'user_has_reviewed_author': user_has_reviewed_author,
+        'companions': companions,
+        'reviewed_companions_ids': list(reviewed_companions_ids),
     })
 
 # ========== ЧАТ ==========

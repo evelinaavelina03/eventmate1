@@ -44,8 +44,7 @@ urlpatterns = [
     path('profile/<str:username>/', profile, name='profile'),
     
     # Отзывы
-    path('reviews/', include('reviews.urls')),  # ← ДОБАВИТЬ ЭТУ СТРОКУ
-    
+    path('reviews/', include('reviews.urls')),  # ← ДОБАВИТЬ ЭТУ СТРОКУ    
     # Добавляем маршруты для ads
     path('ads/', include('ads.urls')),
 ]

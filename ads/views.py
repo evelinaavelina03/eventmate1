@@ -126,6 +126,7 @@ def manage_responses(request, pk):
     })
 
 @login_required
+@login_required
 def update_response_status(request, pk, status):
     response = get_object_or_404(Response, pk=pk)
     advertisement = response.advertisement
@@ -142,8 +143,10 @@ def update_response_status(request, pk, status):
     response.save()
     
     if status == 'accepted':
-        advertisement.status = 'closed'
-        advertisement.save()
+        # Объявление НЕ закрывается — строки закомментированы
+        # advertisement.status = 'closed'
+        # advertisement.save()
+        
         Notification.objects.create(
             recipient=response.user,
             sender=request.user,
@@ -151,7 +154,7 @@ def update_response_status(request, pk, status):
             advertisement=advertisement,
             message=f'Автор объявления "{advertisement.title}" принял(а) ваш отклик.'
         )
-        messages.success(request, f'Вы приняли отклик от {response.user.username}. Объявление закрыто.')
+        messages.success(request, f'Вы приняли отклик от {response.user.username}.')
     else:
         Notification.objects.create(
             recipient=response.user,

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Avg
 
 class City(models.Model):
     city_id = models.AutoField(primary_key=True)
@@ -31,6 +32,13 @@ class User(AbstractUser):
     def unread_notifications_count(self):
         from ads.models import Notification
         return Notification.objects.filter(recipient=self, is_read=False).count()
+
+    def update_rating(self):
+        from reviews.models import Review
+        from django.db.models import Avg
+        avg = Review.objects.filter(reviewed=self).aggregate(Avg('rating'))['rating__avg']
+        self.rating_avg = avg if avg else 0
+        self.save(update_fields=['rating_avg'])
 
     def __str__(self):
         return self.username
