@@ -164,23 +164,7 @@ def event_detail(request, event_id):
 # ========== ЧАТ ==========
 @login_required
 def event_chat(request, event_id):
-    print("=== event_chat called ===")
-    print(f"User: {request.user}")
-    print(f"Event ID: {event_id}")
-    
     event = get_object_or_404(Event, id=event_id)
-    print(f"Event author: {event.author}")
-    
-    # Только участники и организатор могут писать в чат
-    can_chat = (
-        request.user == event.author or 
-        event.requests.filter(user=request.user).exists()
-    )
-    print(f"Can chat: {can_chat}")
-    
-    if not can_chat:
-        messages.error(request, 'Вы можете писать в чат только участников события')
-        return redirect(f'/events/{event.id}/')
     
     if request.method == 'POST':
         form = ChatMessageForm(request.POST)
@@ -194,7 +178,6 @@ def event_chat(request, event_id):
         form = ChatMessageForm()
     
     messages_list = event.chat_messages.all()
-    print(f"Messages count: {messages_list.count()}")
     
     return render(request, 'events/event_chat.html', {
         'event': event,
@@ -221,3 +204,29 @@ def get_messages_api(request, event_id):
         })
     
     return JsonResponse({'messages': data})
+
+# ========== РЕДАКТИРОВАНИЕ СОБЫТИЯ ==========
+@login_required
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    
+    if event.author != request.user:
+        messages.error(request, 'Вы можете редактировать только свои события')
+        return redirect(f'/events/{event.id}/')
+    
+    if request.method == 'POST':
+        form = EventForm(request.POST, request.FILES, instance=event)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Событие успешно обновлено!')
+            return redirect(f'/events/{event.id}/')
+    else:
+        # Передаём текущую дату в правильном формате
+        initial_data = {}
+        if event.event_date:
+            initial_data['event_date'] = event.event_date.strftime('%Y-%m-%dT%H:%M')
+        form = EventForm(instance=event, initial=initial_data)
+    
+    return render(request, 'events/edit_event.html', {'form': form, 'event': event})
+
+

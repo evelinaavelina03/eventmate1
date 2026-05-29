@@ -1,24 +1,144 @@
 {% extends "base.html" %}
-{% block title %}Уведомления{% endblock %}
+{% load static %}
+
+{% block title %}Уведомления | EventMate{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <div class="card event-card p-4">
-        <h2>Уведомления</h2>
-        {% if notifications %}
-            <ul class="list-group">
-                {% for notification in notifications %}
-                    <li class="list-group-item {% if not notification.is_read %}list-group-item-warning{% endif %}">
-                        <p>{{ notification.message }}</p>
-                        <small class="text-muted">{{ notification.created_at|date:"d.m.Y H:i" }}</small>
-                        {% if not notification.is_read %}
-                            <a href="{% url 'mark_notification_read' notification.pk %}" class="btn btn-sm btn-secondary float-end">Прочитано</a>
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>У вас нет уведомлений.</p>
-        {% endif %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Заголовок -->
+            <div class="text-center mb-4">
+                <i class="fas fa-bell fa-3x" style="color: #ff6b6b;"></i>
+                <h1 class="mt-2" style="color: #ff6b6b;">Уведомления</h1>
+                <p class="text-muted">Все ваши уведомления в одном месте</p>
+            </div>
+
+            {% if notifications %}
+                <div class="list-group">
+                    {% for notification in notifications %}
+                    <div class="list-group-item notification-item {% if not notification.is_read %}unread{% endif %} mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="notification-icon me-3">
+                                        {% if notification.notification_type == 'response' %}
+                                            <i class="fas fa-hand-peace fa-2x" style="color: #28a745;"></i>
+                                        {% elif notification.notification_type == 'response_accepted' %}
+                                            <i class="fas fa-check-circle fa-2x" style="color: #17a2b8;"></i>
+                                        {% elif notification.notification_type == 'response_rejected' %}
+                                            <i class="fas fa-times-circle fa-2x" style="color: #dc3545;"></i>
+                                        {% else %}
+                                            <i class="fas fa-bell fa-2x" style="color: #ff6b6b;"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong class="notification-title">{{ notification.get_notification_type_display }}</strong>
+                                        {% if not notification.is_read %}
+                                            <span class="badge bg-danger ms-2">Новое</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <p class="mb-2">{{ notification.message }}</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="far fa-clock"></i> {{ notification.created_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                    
+                                    {% if not notification.is_read %}
+                                        <a href="{% url 'mark_notification_read' notification.pk %}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-check"></i> Отметить прочитанным
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Кнопка "Отметить все" -->
+                <div class="text-center mt-4">
+                    <a href="#" class="btn btn-outline-secondary" id="markAllRead">
+                        <i class="fas fa-check-double"></i> Отметить все как прочитанные
+                    </a>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+                    <h3 class="text-muted">Нет уведомлений</h3>
+                    <p>Здесь будут появляться уведомления о новых откликах и сообщениях</p>
+                    <a href="/" class="btn btn-primary-oval mt-3">
+                        <i class="fas fa-home"></i> На главную
+                    </a>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<style>
+    .notification-item {
+        border-radius: 20px !important;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .notification-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255,107,107,0.1);
+    }
+    
+    .notification-item.unread {
+        background: linear-gradient(135deg, #fff0f0 0%, #ffe8e8 100%);
+        border-left: 4px solid #ff6b6b;
+    }
+    
+    .notification-icon {
+        width: 50px;
+        text-align: center;
+    }
+    
+    .notification-title {
+        font-size: 1rem;
+    }
+    
+    .btn-primary-oval {
+        background-color: #ff6b6b;
+        border: none;
+        border-radius: 30px;
+        padding: 10px 24px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary-oval:hover {
+        background-color: #ff5252;
+        transform: translateY(-2px);
+    }
+    
+    .list-group-item {
+        border: none;
+    }
+</style>
+
+<script>
+    // Отметить все уведомления как прочитанные
+    document.getElementById('markAllRead')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch('/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'Content-Type': 'application/json'
+            }
+        }).then(() => {
+            location.reload();
+        }).catch(() => {
+            console.log('Ошибка при отметке');
+        });
+    });
+</script>
 {% endblock %}

@@ -4,24 +4,29 @@
     --border-radius-oval: 40px;
     --shadow-sm: 0 10px 20px rgba(0,0,0,0.05);
 }
+
 .btn-oval {
     border-radius: var(--border-radius-oval);
     padding: 10px 30px;
     font-weight: 600;
 }
+
 .btn-primary-oval {
     background-color: var(--primary-bright);
     border: none;
     color: white;
 }
+
 .btn-primary-oval:hover {
     background-color: #ff5252;
 }
+
 .btn-secondary-oval {
     background-color: var(--secondary-bright);
     border: none;
     color: white;
 }
+
 .event-card {
     border-radius: 20px;
     border: none;
@@ -29,32 +34,237 @@
     box-shadow: var(--shadow-sm);
     transition: all 0.3s;
 }
+
 .event-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 30px rgba(0,0,0,0.1);
 }
+
 .navbar-custom {
     background-color: white;
     box-shadow: 0 2px 15px rgba(0,0,0,0.05);
     padding: 15px 0;
 }
+
 .navbar-brand {
     font-weight: 700;
     font-size: 1.8rem;
     color: var(--primary-bright);
 }
+
 .nav-link {
     font-weight: 500;
     margin: 0 10px;
     color: #2d3436;
 }
+
 .nav-link:hover {
     color: var(--primary-bright);
 }
+
 .footer {
     background-color: white;
     margin-top: 4rem;
     padding: 2rem 0;
     text-align: center;
     border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* ========== АДАПТИВ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ========== */
+
+/* Для экранов меньше 768px (планшеты и телефоны) */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+    
+    .navbar-nav {
+        text-align: center;
+        padding: 10px 0;
+    }
+    
+    .nav-link {
+        margin: 5px 0;
+        display: inline-block;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    h2, .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-section {
+        padding: 40px 20px !important;
+    }
+    
+    .hero-title {
+        font-size: 2rem !important;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem !important;
+        padding: 0 15px;
+    }
+    
+    .btn-primary-oval, 
+    .btn-outline-light-custom,
+    .btn-outline-secondary-custom {
+        padding: 8px 20px !important;
+        font-size: 0.9rem !important;
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem !important;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem !important;
+    }
+    
+    .event-card {
+        margin-bottom: 15px;
+    }
+    
+    .event-card h4 {
+        font-size: 1.1rem;
+    }
+    
+    .event-card p {
+        font-size: 0.85rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 14px !important;
+        padding: 10px 15px !important;
+    }
+    
+    .avatar-img,
+    .avatar-placeholder {
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .info-item {
+        font-size: 0.85rem;
+    }
+    
+    .chat-messages {
+        max-height: 400px !important;
+    }
+    
+    .message .d-inline-block {
+        max-width: 85% !important;
+    }
+    
+    .message small {
+        font-size: 10px;
+    }
+    
+    .message p {
+        font-size: 12px;
+    }
+    
+    .pagination .page-link {
+        padding: 6px 12px !important;
+        font-size: 12px;
+    }
+    
+    .footer {
+        font-size: 12px;
+        padding: 1.5rem 0;
+    }
+    
+    /* Колонки в карточках */
+    .row .col-md-6,
+    .row .col-lg-4 {
+        width: 100%;
+    }
+}
+
+/* Для экранов меньше 576px (маленькие телефоны) */
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 1.5rem !important;
+    }
+    
+    h1 {
+        font-size: 1.3rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .d-flex.gap-3 {
+        flex-direction: column;
+    }
+    
+    .filter-section {
+        padding: 15px !important;
+    }
+    
+    .avatar-img {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .chat-messages {
+        padding: 10px !important;
+    }
+    
+    .avatar-group {
+        flex-wrap: wrap;
+    }
+    
+    .avatar-group img {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    .stat-number {
+        font-size: 1.2rem !important;
+    }
+}
+
+/* Для экранов от 768px до 992px (планшеты) */
+@media (min-width: 768px) and (max-width: 992px) {
+    .col-md-6 {
+        width: 50%;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem !important;
+    }
+}
+
+/* ========== ЗВЁЗДОЧКА ИЗБРАННОГО ========== */
+.favorite-star {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: inline-block;
+    line-height: 1;
+}
+
+.favorite-star:hover {
+    transform: scale(1.15);
+}
+
+.favorite-star i {
+    transition: all 0.2s ease;
+}
+
+.favorite-star i.fa-star {
+    color: #ff6b6b;
+}
+
+.favorite-star i.far.fa-star {
+    color: #ff6b6b;
+    opacity: 0.7;
 }

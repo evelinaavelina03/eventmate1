@@ -14,7 +14,6 @@
                 <input type="text" name="search" class="form-control" placeholder="🔎 Поиск по названию или описанию..." value="{{ search_query }}" style="border-radius: 30px; padding: 12px 20px;">
             </div>
             
-            <!-- Город: ввод + выбор из списка -->
             <div class="col-md-4">
                 <input type="text" name="city" list="city-list" class="form-control" placeholder="📍 Введите или выберите город..." value="{{ city_name }}" style="border-radius: 30px; padding: 12px 20px;">
                 <datalist id="city-list">
@@ -24,7 +23,6 @@
                 </datalist>
             </div>
             
-            <!-- Категория: ввод + выбор из списка -->
             <div class="col-md-4">
                 <input type="text" name="interest" list="interest-list" class="form-control" placeholder="🏷️ Введите или выберите категорию..." value="{{ selected_interest_name }}" style="border-radius: 30px; padding: 12px 20px;">
                 <datalist id="interest-list">
@@ -34,7 +32,6 @@
                 </datalist>
             </div>
             
-            <!-- Диапазон дат: календарь -->
             <div class="col-md-4">
                 <input type="text" name="date_range" id="date_range" class="form-control" placeholder="📅 Выберите диапазон дат" value="{{ date_range }}" style="border-radius: 30px !important; padding: 12px 20px !important; cursor: pointer;">
             </div>
@@ -50,7 +47,7 @@
         </form>
     </div>
 
-    <!-- Показываем активные фильтры -->
+    <!-- Активные фильтры -->
     {% if search_query or city_name or selected_interest_name or date_range_formatted %}
     <div class="alert alert-info mb-3" style="border-radius: 20px;">
         <i class="fas fa-filter"></i> <strong>Активные фильтры:</strong>
@@ -65,6 +62,7 @@
     <!-- Количество найденных событий -->
     <p class="text-muted mb-3">Найдено событий: {{ events.paginator.count }}</p>
     
+    <!-- Карточки событий -->
     <div class="row">
         {% for event in events %}
         <div class="col-md-6 col-lg-4 mb-4">
@@ -76,7 +74,9 @@
                     <i class="fas fa-image fa-3x text-secondary"></i>
                 </div>
                 {% endif %}
-                <h4>{{ event.title }}</h4>
+                
+                <h4 class="mb-2">{{ event.title }}</h4>
+                
                 <p class="text-muted">{{ event.description|truncatewords:20 }}</p>
                 
                 <div class="mt-2">
@@ -98,31 +98,51 @@
         {% endfor %}
     </div>
 
-    <!-- Пагинация Назад / Вперёд -->
+    <!-- Пагинация -->
     {% if events.has_other_pages %}
     <nav class="mt-4">
         <ul class="pagination justify-content-center">
             {% if events.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ events.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">← Назад</a>
+                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ events.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
             </li>
             {% else %}
             <li class="page-item disabled">
-                <span class="page-link">← Назад</span>
+                <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-left"></i></span>
             </li>
             {% endif %}
 
             <li class="page-item active">
-                <span class="page-link">{{ events.number }} / {{ events.paginator.num_pages }}</span>
+                <span class="page-link">{{ events.number }}</span>
             </li>
 
             {% if events.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ events.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">Вперёд →</a>
+                <a class="page-link" href="?page={{ events.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ events.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if city_name %}&city={{ city_name }}{% endif %}{% if selected_interest_name %}&interest={{ selected_interest_name }}{% endif %}{% if date_range %}&date_range={{ date_range }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
             </li>
             {% else %}
             <li class="page-item disabled">
-                <span class="page-link">Вперёд →</span>
+                <span class="page-link"><i class="fas fa-angle-right"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
             </li>
             {% endif %}
         </ul>
@@ -131,16 +151,51 @@
 </div>
 
 <style>
-    /* Принудительно делаем поле с датой овальным */
-    #date_range,
+    .pagination .page-link {
+        color: #ff6b6b;
+        border: none;
+        margin: 0 5px;
+        border-radius: 30px !important;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+        background-color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #ff6b6b;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(255,107,107,0.3);
+    }
+    
+    .pagination .active .page-link {
+        background-color: #ff6b6b;
+        color: white;
+        box-shadow: 0 4px 10px rgba(255,107,107,0.3);
+    }
+    
+    .pagination .disabled .page-link {
+        color: #ccc;
+        background-color: #f8f9fa;
+    }
+    
     .flatpickr-input {
         border-radius: 30px !important;
-        padding: 12px 20px !important;
+    }
+    
+    .event-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 20px;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(255,107,107,0.15);
     }
 </style>
 
 <script>
-    // Ждём полной загрузки DOM
     document.addEventListener('DOMContentLoaded', function() {
         var dateRangeInput = document.getElementById('date_range');
         if (dateRangeInput) {

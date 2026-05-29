@@ -1,15 +1,177 @@
 {% extends "base.html" %}
-{% block title %}Редактировать профиль{% endblock %}
+{% load static %}
+
+{% block title %}Редактировать профиль | EventMate{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <div class="card event-card p-4">
-        <h2>Редактирование профиля</h2>
-        <form method="post" enctype="multipart/form-data">  <!-- ← ДОБАВЛЕНО enctype -->
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary-oval btn-oval">Сохранить</button>
-            <a href="/profile/{{ user.username }}/" class="btn btn-secondary-oval btn-oval">Отмена</a>  <!-- ← ИСПРАВЛЕНО -->
-        </form>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Карточка редактирования -->
+            <div class="card profile-edit-card p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-edit fa-3x" style="color: #ff6b6b;"></i>
+                    <h2 class="mt-2" style="color: #ff6b6b;">Редактирование профиля</h2>
+                    <p class="text-muted">Обновите информацию о себе</p>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Аватар -->
+                    <div class="text-center mb-4">
+                        <div class="avatar-upload">
+                            <div class="avatar-preview mb-3">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" class="rounded-circle avatar-preview-img" id="avatarPreview">
+                                {% else %}
+                                    <div class="avatar-placeholder rounded-circle mx-auto">
+                                        <i class="fas fa-user fa-3x text-white"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <label class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-camera"></i> Выбрать фото
+                                {{ form.avatar }}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Имя</label>
+                            {{ form.first_name }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Фамилия</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        {{ form.email }}
+                        <small class="text-muted">Email будет использоваться для входа</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Телефон</label>
+                        {{ form.phone }}
+                        <small class="text-muted">Необязательно</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Дата рождения</label>
+                        {{ form.birth_date }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Город</label>
+                        {{ form.city }}
+                    </div>
+                    
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary-oval flex-grow-1">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                        <a href="{% url 'profile' username=request.user.username %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Отмена
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    .profile-edit-card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        background: white;
+    }
+    
+    .avatar-preview-img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 3px solid #ff6b6b;
+    }
+    
+    .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .avatar-placeholder i {
+        font-size: 3rem;
+        color: white;
+    }
+    
+    .avatar-upload input[type="file"] {
+        display: none;
+    }
+    
+    .btn-primary-oval {
+        background-color: #ff6b6b;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 24px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary-oval:hover {
+        background-color: #ff5252;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-secondary {
+        border-radius: 30px;
+        padding: 12px 24px;
+    }
+    
+    input, select, textarea {
+        border-radius: 15px !important;
+        border: 1px solid #e0e0e0;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 0.2rem rgba(255,107,107,0.25);
+        outline: none;
+    }
+</style>
+
+<script>
+    // Предпросмотр аватарки
+    document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.querySelector('#avatarPreview');
+                if (preview) {
+                    preview.src = event.target.result;
+                } else {
+                    const newPreview = document.createElement('img');
+                    newPreview.src = event.target.result;
+                    newPreview.className = 'rounded-circle avatar-preview-img';
+                    newPreview.id = 'avatarPreview';
+                    document.querySelector('.avatar-preview').innerHTML = '';
+                    document.querySelector('.avatar-preview').appendChild(newPreview);
+                }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+</script>
 {% endblock %}

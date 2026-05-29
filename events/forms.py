@@ -1,10 +1,10 @@
 from django import forms
-from .models import Event, EventChatMessage  # ← добавили импорт
+from .models import Event, EventChatMessage
 
 class EventForm(forms.ModelForm):
     # Указываем, что для поля event_date мы будем использовать специальный HTML-виджет для ввода даты и времени
     event_date = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
         input_formats=['%Y-%m-%dT%H:%M'],
         label="Дата и время события"
     )
@@ -13,9 +13,11 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ['title', 'description', 'interest', 'event_date', 'city', 'image']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 4}),
-            'interest': forms.Select(),
-            'city': forms.Select(),
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'interest': forms.Select(attrs={'class': 'form-control'}),
+            'city': forms.Select(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'title': 'Название события',

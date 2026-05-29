@@ -50,7 +50,7 @@ class Event(models.Model):
     # Дополнительные поля
     event_date = models.DateTimeField(null=True, blank=True)
     
-    # Поле для изображения (новое, вместо image_url)
+    # Поле для изображения
     image = models.ImageField(upload_to=event_photo_path, blank=True, null=True, verbose_name="Изображение события")
     
     # Статус модерации
@@ -70,7 +70,7 @@ class Event(models.Model):
     def get_participants(self):
         """Возвращает список участников события"""
         return [request.user for request in self.requests.all()]
-    
+
 class EventChatMessage(models.Model):
     event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='chat_messages')
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)

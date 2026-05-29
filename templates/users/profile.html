@@ -1,75 +1,221 @@
 {% extends "base.html" %}
-{% block title %}{{ profile_user.username }}{% endblock %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }} | EventMate{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-4">
-            <div class="card event-card p-3">
-                {% if profile_user.avatar %}
-                <img src="{{ profile_user.avatar.url }}" class="rounded-circle mx-auto d-block mb-3" width="150" height="150" style="object-fit: cover;">
-                {% else %}
-                <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px;">
-                    <i class="fas fa-user fa-4x text-secondary"></i>
+        <!-- Левая колонка - профиль -->
+        <div class="col-md-4 mb-4">
+            <div class="card profile-card text-center">
+                <div class="card-body">
+                    <!-- Аватар -->
+                    <div class="avatar-container mb-3">
+                        {% if profile_user.avatar %}
+                            <img src="{{ profile_user.avatar.url }}" class="rounded-circle avatar-img" alt="{{ profile_user.username }}">
+                        {% else %}
+                            <div class="avatar-placeholder rounded-circle mx-auto">
+                                <i class="fas fa-user fa-3x text-white"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="mb-2">{{ profile_user.username }}</h3>
+                    
+                    <!-- Рейтинг -->
+                    <div class="rating mb-3">
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-star"></i> Рейтинг: {{ profile_user.rating_avg|default:"0" }} / 5
+                        </span>
+                    </div>
+                    
+                    <!-- Информация -->
+                    <div class="info-list text-start">
+                        <div class="info-item">
+                            <i class="fas fa-envelope" style="color: #ff6b6b;"></i>
+                            <strong>Email:</strong>
+                            {% if request.user == profile_user %}
+                                {{ profile_user.email }}
+                            {% else %}
+                                <span class="text-muted">скрыт</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-phone" style="color: #ff6b6b;"></i>
+                            <strong>Телефон:</strong>
+                            {% if request.user == profile_user %}
+                                {{ profile_user.phone|default:"не указан" }}
+                            {% else %}
+                                <span class="text-muted">скрыт</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt" style="color: #ff6b6b;"></i>
+                            <strong>Город:</strong> {{ profile_user.city.name|default:"не указан" }}
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt" style="color: #ff6b6b;"></i>
+                            <strong>Дата рождения:</strong> {{ profile_user.birth_date|date:"d.m.Y"|default:"не указана" }}
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-calendar-check" style="color: #ff6b6b;"></i>
+                            <strong>На сайте с:</strong> {{ profile_user.created_at|date:"d.m.Y" }}
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопки действий -->
+                    {% if request.user == profile_user %}
+                        <div class="action-buttons mt-4">
+                            <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fas fa-edit"></i> Редактировать профиль
+                            </a>
+                            <a href="/events/create/" class="btn btn-primary-oval w-100 mb-2">
+                                <i class="fas fa-calendar-plus"></i> Создать событие
+                            </a>
+                            <a href="{% url 'create_listing' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-bullhorn"></i> Создать объявление
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                <h3 class="text-center">{{ profile_user.username }}</h3>
-                
-                <!-- Контакты видны только владельцу профиля -->
-                {% if request.user == profile_user %}
-                    <p><strong>Email:</strong> {{ profile_user.email }}</p>
-                    <p><strong>Телефон:</strong> {{ profile_user.phone|default:"не указан" }}</p>
-                {% else %}
-                    <p><strong>Email:</strong> <span class="text-muted">скрыт</span></p>
-                    <p><strong>Телефон:</strong> <span class="text-muted">скрыт</span></p>
-                    <p><small class="text-muted">Контакты доступны только владельцу профиля</small></p>
-                {% endif %}
-                
-                <p><strong>Город:</strong> {{ profile_user.city.name|default:"не указан" }}</p>
-                <p><strong>Дата рождения:</strong> {{ profile_user.birth_date|date:"d.m.Y"|default:"не указана" }}</p>
-                <p><strong>Рейтинг:</strong> {{ profile_user.rating_avg|default:"0" }} / 5</p>
-                
-                {% if request.user == profile_user %}
-                    <a href="{% url 'edit_profile' %}" class="btn btn-secondary-oval btn-oval mt-3">Редактировать профиль</a>
-                {% endif %}
             </div>
         </div>
+        
+        <!-- Правая колонка - события и объявления -->
         <div class="col-md-8">
-            <h4>События пользователя</h4>
-            {% for event in events %}
-                <div class="card event-card mb-2 p-2">
-                    <a href="/events/{{ event.pk }}/">{{ event.title }}</a> - {{ event.event_date|date:"d.m.Y" }}
+            <!-- События пользователя -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-alt" style="color: #ff6b6b;"></i> События пользователя</h4>
                 </div>
-            {% empty %}
-                <p>Нет созданных событий.</p>
-            {% endfor %}
-            
-            <h4>Объявления о поиске напарника</h4>
-            {% for listing in listings %}
-                <div class="card event-card mb-2 p-2">
-                    <a href="/listings/{{ listing.pk }}/">{{ listing.title }}</a>
+                <div class="card-body">
+                    {% if events %}
+                        {% for event in events %}
+                        <div class="activity-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="/events/{{ event.pk }}/" class="fw-bold">{{ event.title }}</a>
+                                <div class="text-muted small">
+                                    <i class="fas fa-calendar-day"></i> {{ event.event_date|date:"d.m.Y H:i" }}
+                                </div>
+                            </div>
+                            <span class="badge bg-secondary">{{ event.get_participants_count }} участников</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">Нет созданных событий</p>
+                    {% endif %}
                 </div>
-            {% empty %}
-                <p>Нет объявлений.</p>
-            {% endfor %}
-            
-            <!-- Блок отзывов -->
-            <h4 class="mt-4">📝 Отзывы обо мне</h4>
-            {% for review in profile_user.reviews_received.all %}
-            <div class="card mb-2 p-3">
-                <div class="d-flex justify-content-between">
-                    <strong>{{ review.reviewer.username }}</strong>
-                    <span class="text-warning">
-                        {% for i in "12345"|slice:review.rating %}⭐{% endfor %}
-                    </span>
-                </div>
-                <p class="mb-1"><small>Событие: {{ review.event.title }}</small></p>
-                <p>{{ review.comment|default:"Без комментария" }}</p>
-                <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
             </div>
-            {% empty %}
-            <p>Пока нет отзывов</p>
-            {% endfor %}
+            
+            <!-- Объявления пользователя -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-bullhorn" style="color: #ff6b6b;"></i> Объявления о поиске напарника</h4>
+                </div>
+                <div class="card-body">
+                    {% if listings %}
+                        {% for listing in listings %}
+                        <div class="activity-item">
+                            <a href="/listings/{{ listing.pk }}/" class="fw-bold">{{ listing.title }}</a>
+                            <div class="text-muted small">
+                                <i class="fas fa-clock"></i> {{ listing.created_at|date:"d.m.Y" }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">Нет созданных объявлений</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .profile-card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .avatar-img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 3px solid #ff6b6b;
+    }
+    
+    .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .info-list {
+        margin-top: 20px;
+    }
+    
+    .info-item {
+        margin-bottom: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item i {
+        width: 25px;
+        margin-right: 10px;
+    }
+    
+    .btn-primary-oval {
+        background-color: #ff6b6b;
+        border: none;
+        border-radius: 30px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary-oval:hover {
+        background-color: #ff5252;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-primary {
+        border-radius: 30px;
+        padding: 10px 20px;
+    }
+    
+    .btn-outline-success {
+        border-radius: 30px;
+        padding: 10px 20px;
+    }
+    
+    .activity-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .card-header {
+        border-bottom: 2px solid #ff6b6b20;
+        border-radius: 25px 25px 0 0 !important;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+</style>
 {% endblock %}

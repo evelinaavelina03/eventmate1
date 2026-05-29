@@ -1,62 +1,67 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Редактировать объявление | EventMate{% endblock %}
+{% block title %}Редактировать событие | EventMate{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <!-- Кнопка назад -->
-            <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-outline-secondary mb-3">
-                <i class="fas fa-arrow-left"></i> Назад к объявлению
-            </a>
-            
-            <!-- Карточка редактирования -->
             <div class="card event-card p-4">
                 <div class="text-center mb-4">
                     <i class="fas fa-edit fa-3x" style="color: #ffc107;"></i>
-                    <h2 class="mt-2" style="color: #ffc107;">Редактировать объявление</h2>
-                    <p class="text-muted">Измените информацию о поиске напарника</p>
+                    <h2 class="mt-2" style="color: #ffc107;">Редактировать событие</h2>
+                    <p class="text-muted">Измените информацию о мероприятии</p>
                 </div>
                 
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Заголовок</label>
+                        <label class="form-label fw-bold">Название события</label>
                         {{ form.title }}
-                        <small class="text-muted">Краткое описание того, кого ищете</small>
                     </div>
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Описание</label>
                         {{ form.description }}
-                        <small class="text-muted">Подробно опишите, кого ищете и условия</small>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Мероприятие</label>
-                        {{ form.event }}
-                        <small class="text-muted">Выберите событие, на которое ищете напарника</small>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Категория</label>
+                            {{ form.interest }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Город</label>
+                            {{ form.city }}
+                        </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Сколько человек нужно</label>
-                        {{ form.companions_needed }}
-                        <small class="text-muted">Количество напарников, которых вы ищете</small>
-                    </div>
-                    
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle"></i> Статус объявления: 
-                        <strong>{{ listing.get_status_display }}</strong>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Дата и время</label>
+                            {{ form.event_date }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Фотография</label>
+                            {{ form.image }}
+                            {% if event.image %}
+                                <div class="mt-2">
+                                    <img src="{{ event.image.url }}" class="img-fluid rounded" style="max-height: 100px;">
+                                    <small class="text-muted d-block">Текущее фото</small>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                     
                     <div class="d-flex gap-3 mt-4">
                         <button type="submit" class="btn btn-warning flex-grow-1">
                             <i class="fas fa-save"></i> Сохранить изменения
                         </button>
-                        <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-outline-secondary">
+                        <a href="/events/{{ event.id }}/" class="btn btn-outline-secondary">
                             <i class="fas fa-times"></i> Отмена
                         </a>
                     </div>
@@ -81,7 +86,6 @@
         padding: 12px 24px;
         font-weight: 500;
         transition: all 0.3s ease;
-        color: #1a1a1a;
     }
     
     .btn-warning:hover {
@@ -98,7 +102,7 @@
         border-radius: 15px !important;
         border: 1px solid #e0e0e0;
         padding: 10px 15px;
-        transition: all 0.3s ease;
+        width: 100%;
     }
     
     input:focus, select:focus, textarea:focus {
@@ -109,12 +113,6 @@
     
     textarea {
         min-height: 100px;
-    }
-    
-    .alert-info {
-        border-radius: 15px;
-        background-color: #e7f3ff;
-        border: none;
     }
 </style>
 {% endblock %}

@@ -1,27 +1,78 @@
 {% extends "base.html" %}
-{% block title %}Объявления о поиске напарника{% endblock %}
+{% load static %}
+
+{% block title %}Объявления о поиске напарника | EventMate{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h1>Объявления о поиске напарника</h1>
+    <!-- Hero секция -->
+    <div class="text-center mb-5 py-4" style="background: linear-gradient(135deg, #fff0f0 0%, #ffe8e8 100%); border-radius: 30px;">
+        <i class="fas fa-bullhorn fa-3x" style="color: #ff6b6b;"></i>
+        <h1 class="mt-2" style="color: #ff6b6b;">Объявления о поиске напарника</h1>
+        <p class="text-muted">Найдите компанию для совместного посещения мероприятий</p>
+        <a href="{% url 'create_listing' %}" class="btn btn-primary-oval mt-2">
+            <i class="fas fa-plus"></i> Создать объявление
+        </a>
+    </div>
+
     {% if listings %}
         <div class="row">
             {% for listing in listings %}
-            <div class="col-md-6 mb-4">
+            <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card event-card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">{{ listing.title }}</h5>
-                        <p class="card-text">{{ listing.description|truncatewords:30 }}</p>
-                        <p><strong>Событие:</strong> <a href="/events/{{ listing.event.pk }}/">{{ listing.event.title }}</a></p>
-                        <p><strong>Автор:</strong> {{ listing.author.username }}</p>
-                        <p><strong>Нужно напарников:</strong> {{ listing.companions_needed }}</p>
-                        <a href="/listings/{{ listing.pk }}/" class="btn btn-primary-oval btn-oval">Подробнее</a>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">{{ listing.title|truncatechars:30 }}</h5>
+                            <span class="badge bg-success">{{ listing.companions_needed }} чел.</span>
+                        </div>
+                        <p class="card-text text-muted small">{{ listing.description|truncatewords:20 }}</p>
+                        <hr>
+                        <div class="mb-2">
+                            <p class="mb-1"><i class="fas fa-calendar-alt" style="color: #ff6b6b;"></i> <strong>Событие:</strong> 
+                                <a href="/events/{{ listing.event.pk }}/">{{ listing.event.title|truncatechars:25 }}</a>
+                            </p>
+                            <p class="mb-1"><i class="fas fa-user" style="color: #ff6b6b;"></i> <strong>Автор:</strong> {{ listing.author.username }}</p>
+                            <p class="mb-1"><i class="fas fa-calendar-day" style="color: #ff6b6b;"></i> <strong>Создано:</strong> {{ listing.created_at|date:"d.m.Y" }}</p>
+                        </div>
+                        <a href="/listings/{{ listing.pk }}/" class="btn btn-primary-oval w-100 mt-2">
+                            Подробнее →
+                        </a>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>Пока нет объявлений. <a href="{% url 'create_listing' %}">Создайте первое!</a></p>
+        <div class="text-center py-5">
+            <i class="fas fa-newspaper fa-4x text-muted mb-3"></i>
+            <h3>Пока нет объявлений</h3>
+            <p class="text-muted">Будьте первым, кто создаст объявление о поиске напарника!</p>
+            <a href="{% url 'create_listing' %}" class="btn btn-primary-oval">Создать объявление</a>
+        </div>
     {% endif %}
 </div>
+
+<style>
+    .event-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(255,107,107,0.15);
+    }
+    .btn-primary-oval {
+        background-color: #ff6b6b;
+        border: none;
+        border-radius: 30px;
+        padding: 8px 20px;
+        transition: all 0.3s ease;
+    }
+    .btn-primary-oval:hover {
+        background-color: #ff5252;
+        transform: scale(1.02);
+    }
+</style>
 {% endblock %}
